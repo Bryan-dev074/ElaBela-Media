@@ -1,0 +1,559 @@
+.radar-discovery {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+  align-items: center;
+  gap: 32px;
+  padding: 24px 36px 26px 18px;
+  margin-bottom: 36px;
+  border-radius: 16px;
+  background: radial-gradient(ellipse at 28% 50%, #eee6f9 0%, #fcfaff 45%, #ffffff 85%);
+}
+.orbit-area {
+  container-type: inline-size;
+  min-width: 0;
+  text-align: center;
+}
+.orbit-instruction {
+  color: var(--muted);
+  font-size: var(--text-body);
+  margin: 4px 0 0;
+}
+.orbit-map {
+  position: relative;
+  width: 100%;
+  max-width: 570px;
+  height: 370px;
+  margin: 0 auto;
+}
+.orbit-rings {
+  position: absolute;
+  width: 298px;
+  height: 298px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.orbit-rings > i {
+  position: absolute;
+  border: 1px solid #c6b4df66;
+  border-radius: 50%;
+}
+.orbit-rings > i:nth-child(1) {
+  inset: 0;
+  border-style: dashed;
+}
+.orbit-rings > i:nth-child(2) {
+  inset: 25px;
+}
+.orbit-rings > i:nth-child(3) {
+  inset: 52px;
+  background: #dccaf11f;
+}
+.orbit-satellite {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #8c6dc0;
+  border-radius: 50%;
+}
+.orbit-satellite.one {
+  left: 20%;
+  top: 9%;
+}
+.orbit-satellite.two {
+  right: 4%;
+  top: 69%;
+  width: 4px;
+  height: 4px;
+}
+.orbit-satellite.three {
+  left: 15%;
+  bottom: 13%;
+  width: 4px;
+  height: 4px;
+}
+.orbit-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 140px;
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 50%;
+  color: white;
+  background: linear-gradient(145deg, #9374cd, #6843a5 62%, #452775);
+  box-shadow:
+    inset 0 1px 2px #fff5,
+    0 14px 28px #53328b25;
+  transition:
+    box-shadow 0.25s,
+    filter 0.25s;
+}
+.orbit-core:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 2px #fff5,
+    0 18px 32px #53328b35;
+}
+.orbit-core > strong {
+  font-family: Manrope, sans-serif;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 600;
+  max-width: 110px;
+}
+.orbit-core > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-sm);
+}
+.orbit-topic {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  min-height: 58px;
+  width: 180px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fefcff;
+  color: var(--ink);
+  box-shadow:
+    0 3px 10px #4c2e7712,
+    0 1px 2px #4c2e770d;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s,
+    color 0.2s;
+}
+.orbit-topic:hover {
+  background: #f0e7fb;
+  box-shadow: 0 5px 14px #4c2e771c;
+}
+.orbit-topic[aria-pressed="true"] {
+  background: #ede1fa;
+  box-shadow:
+    0 0 0 1.5px #9272bc,
+    0 4px 12px #4c2e7715;
+  color: var(--accent-deep);
+}
+.orbit-topic-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #eee7f8;
+  color: #71529e;
+}
+.orbit-topic[aria-pressed="true"] .orbit-topic-icon {
+  background: var(--accent);
+  color: white;
+}
+.orbit-topic-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.orbit-topic-copy > strong {
+  font-size: var(--text-body);
+  font-weight: 650;
+}
+.orbit-topic-copy > small {
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  color: var(--muted);
+}
+.orbit-topic-check {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+}
+.orbit-makeup {
+  left: 50%;
+  top: 9%;
+}
+.orbit-skincare {
+  left: 16%;
+  top: 33%;
+}
+.orbit-nails {
+  left: 84%;
+  top: 33%;
+}
+.orbit-fragrance {
+  left: 16%;
+  top: 72%;
+}
+.orbit-hair {
+  left: 84%;
+  top: 72%;
+}
+.orbit-lifestyle {
+  left: 50%;
+  top: 94%;
+}
+.orbit-reset {
+  margin-top: 13px;
+  font-size: var(--text-body);
+}
+.orbit-reset[aria-pressed="true"] {
+  color: var(--ink);
+}
+.radar-direction {
+  max-width: 350px;
+  padding: 6px 0 4px;
+}
+.direction-caption {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  font-size: var(--text-body);
+  color: var(--accent-deep);
+  margin-bottom: 12px;
+}
+.direction-caption > span {
+  width: 5px;
+  height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.radar-direction h2 {
+  font-size: 25px;
+  line-height: 1.25;
+  max-width: 280px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.direction-description {
+  font-size: var(--text-body);
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 14px 0 22px;
+  min-height: 60px;
+}
+.research-styles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 0;
+}
+.research-styles legend {
+  font-size: var(--text-body);
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.research-styles button {
+  padding: 7px 11px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font-size: var(--text-body);
+  color: var(--muted);
+  background: white;
+}
+.research-styles button:hover {
+  border-color: #9272bc;
+}
+.research-styles button[aria-pressed="true"] {
+  background: var(--wash);
+  border-color: #a88ec9;
+  color: var(--accent-deep);
+}
+.direction-search {
+  margin-top: 22px;
+  width: 100%;
+  justify-content: space-between;
+}
+.direction-note {
+  margin-top: 9px;
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+.direction-library {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: var(--text-body);
+  color: var(--muted);
+}
+.direction-library-count {
+  font-size: 19px;
+  font-family: Manrope, sans-serif;
+  color: var(--accent-deep);
+}
+.reference-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin: 30px 0 22px;
+}
+.reference-heading h2 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.reference-heading p {
+  font-size: var(--text-body);
+  color: var(--muted);
+  margin-top: 7px;
+}
+.reference-heading .search-field {
+  min-width: 210px;
+  min-height: 40px;
+}
+.reference-heading .search-field input {
+  font-size: var(--text-body);
+}
+.reference-heading .search-field input::placeholder {
+  color: var(--muted);
+}
+.reference-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--line);
+}
+.reference-filters label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: var(--text-body);
+}
+.reference-filters select {
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 8px 25px 8px 10px;
+  max-width: 100%;
+  min-height: 36px;
+}
+.reference-filters .text-button {
+  margin-left: auto;
+}
+.social-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+  white-space: nowrap;
+  font-size: inherit;
+}
+.social-source-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: #eee7f5;
+}
+.social-source-icon img {
+  display: block;
+  width: 13px;
+  height: 13px;
+}
+.social-source[data-platform="pinterest"] .social-source-icon {
+  background: #fbe8ec;
+}
+.social-source[data-platform="instagram"] .social-source-icon {
+  background: #f6e5f0;
+}
+.social-source[data-platform="facebook"] .social-source-icon {
+  background: #e4edfb;
+}
+.social-source[data-platform="youtube"] .social-source-icon {
+  background: #fbe7e7;
+}
+.trend-card .trend-meta {
+  font-size: var(--text-body);
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.trend-card .trend-meta .meta-separator {
+  margin: 0 1px;
+}
+.trend-card .card-title {
+  line-height: 1.4;
+}
+.trend-brief .source-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.source-credit {
+  display: block;
+  margin-top: 7px;
+}
+.search-direction-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 20px 0 16px;
+}
+.empty-state .button {
+  margin-top: 18px;
+}
+@media (max-width: 1200px) {
+  .radar-discovery {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 23px 22px;
+  }
+  .radar-direction {
+    max-width: none;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+  .radar-direction h2 {
+    max-width: none;
+  }
+  .direction-description {
+    min-height: 0;
+    max-width: 50ch;
+  }
+  .direction-library {
+    margin-top: 16px;
+  }
+}
+@media (max-width: 520px) {
+  .radar-discovery {
+    margin-left: -8px;
+    margin-right: -8px;
+    padding: 20px 12px;
+    gap: 22px;
+  }
+}
+@container (max-width: 480px) {
+  .orbit-instruction {
+    font-size: var(--text-body);
+  }
+  .orbit-map {
+    height: 360px;
+    max-width: 390px;
+  }
+  .orbit-rings {
+    width: 244px;
+    height: 244px;
+  }
+  .orbit-topic {
+    width: 128px;
+    min-height: 53px;
+    padding: 9px 8px;
+    gap: 6px;
+    border-radius: 12px;
+  }
+  .orbit-topic-icon {
+    width: 25px;
+    height: 25px;
+  }
+  .orbit-topic-icon svg {
+    width: 15px;
+    height: 15px;
+  }
+  .orbit-topic-copy > strong {
+    font-size: var(--text-sm);
+  }
+  .orbit-topic-copy > small {
+    display: none;
+  }
+  .orbit-skincare,
+  .orbit-nails {
+    top: 25%;
+  }
+  .orbit-fragrance,
+  .orbit-hair {
+    top: 76%;
+  }
+  .orbit-core {
+    width: 112px;
+    height: 112px;
+    gap: 7px;
+  }
+  .orbit-core > svg {
+    width: 17px;
+    height: 17px;
+  }
+  .orbit-core > strong {
+    font-size: var(--text-body);
+  }
+  .orbit-core > span {
+    font-size: var(--text-xs);
+  }
+}
+@media (max-width: 520px) {
+  .radar-direction {
+    padding: 20px 5px 0;
+  }
+  .radar-direction h2 {
+    font-size: 22px;
+  }
+  .research-styles button {
+    min-height: 38px;
+  }
+  .reference-heading {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .reference-heading h2 {
+    font-size: 21px;
+  }
+  .reference-filters {
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .reference-filters label {
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .reference-filters .text-button {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+@container (max-width: 300px) {
+  .orbit-topic {
+    width: 106px;
+    gap: 5px;
+    padding: 8px 5px;
+  }
+  .orbit-topic-copy > strong {
+    font-size: var(--text-sm);
+  }
+  .orbit-topic-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .orbit-core {
+    width: 100px;
+    height: 100px;
+  }
+  .orbit-rings {
+    width: 226px;
+    height: 226px;
+  }
+}

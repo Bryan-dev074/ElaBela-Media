@@ -10,7 +10,7 @@ Consultar completo antes de UI, animaciones o efectos. Última revisión: 2026-0
 - Base: controles semánticos y Radix Dialog para foco, Escape y modales.
 - Motor JS de animación adoptado: **Motion 13.2.0**. No sumar GSAP.
 - Scroll: nativo. Sin controlador adicional.
-- Presupuesto configurado: 220 KiB gzip de JS inicial (`npm run check:bundle`). Medición final: 109,5 KiB gzip; resultado en `docs/verificacion.md`.
+- Presupuesto configurado: 220 KiB gzip de JS inicial (`npm run check:bundle`). Medición tras el radar orbital: 112,9 KiB gzip; resultado en `docs/verificacion.md`.
 - Uso: herramienta de marketing comercial, código en repositorio público. Mantener avisos de licencia de código/assets reutilizados; no vender un kit de terceros.
 
 ## ADOPTADAS
@@ -23,6 +23,7 @@ Instalación local: `npm install --ignore-scripts`, 165 paquetes, auditoría ini
 | Radix Dialog | `src/components/ui.tsx`; foco, Escape, visor y confirmación | Axe y teclado con diálogos reales |
 | Motion | `src/App.tsx`; entrada breve de pantallas, sin scroll controlado | Importación selectiva, reduced-motion, bundle |
 | Lucide React | Acciones con nombres accesibles en componentes | Tree shaking y medición final |
+| Simple Icons, cinco SVG individuales | Logos de Pinterest, Instagram, Facebook, TikTok y YouTube junto a fuentes; sin paquete npm | CC0 1.0 revisada en repositorio oficial, revisión SVG sin scripts/enlaces; commit y licencia en `public/brand/social/README.md`. Etiqueta visible y SVG decorativo para evitar duplicar el nombre accesible |
 | Fastify + multipart 10.1.1 + static 10.1.3 (MIT) | `server/app.ts`; API loopback, uploads y frontend local | Contratos, autorización y límites mediante Vitest |
 | Zod | `server/`; validación en frontera de entrada | Evitar validación duplicada en cada componente |
 | Sharp | `server/media.ts`; validar imágenes, previews y exportaciones | Comprobar binario Windows y originales intactos |
@@ -98,3 +99,9 @@ La búsqueda inicial admite resultados filtrados/paginados sin una tabla analít
 DM Sans variable para controles y Manrope variable para titulares. Fuente: repositorio oficial google/fonts y CSS de Google Fonts. Ambas SIL OFL 1.1, revisada en `ofl/dmsans/OFL.txt` y `ofl/manrope/OFL.txt`; permite este empaquetado con los avisos conservados. Archivos WOFF2 Latin autoalojados en `public/fonts/`, sin petición externa para tipografía. No requieren biblioteca JS, soportan ES/PT-BR; fallback Segoe UI. Peso descargado total: 61.768 bytes. Se descarta cargar Google Fonts remoto por privacidad, offline y estabilidad visual.
 
 Antes de incorporar una candidata, comprobar framework/versiones/estilos, motores duplicados, bytes reales frente al presupuesto, permiso de uso comercial/redistribución y foco/ARIA/movimiento reducido. Lo decorativo no necesita una librería si CSS resuelve el caso. La licencia de un icono de marca no equivale a permiso de endoso; el enlace a Bryan debe identificarse como autor del proyecto.
+
+### Radar orbital — revisión 2026-09-09
+
+Referencia A elegida explícitamente por Bryan. Se adopta CSS propio para anillos y esfera, y botones nativos con iconos Lucide ya instalados para las seis categorías. No necesita WebGL, React Bits ni otro motor de animación. Selección con `aria-pressed`, foco visible, tamaño táctil y composición orbital también en móvil; transiciones respetan pausa y movimiento reducido. Simple Icons se evaluó como candidata nueva antes de usar sus cinco assets: compatible con cualquier framework, sin JS ni dependencias, licencia CC0 redistribuida. Son identificadores de las fuentes, sin implicar asociación con las plataformas. Peso y pruebas del resultado se registran en `docs/verificacion.md`.
+
+Revisión de legibilidad solicitada por Bryan: escala tipográfica con tokens `rem`, metadatos desde 12px, lectura habitual 14–16px y botones de 14px. Reutiliza fuentes y CSS existentes; sin nueva dependencia. Verificar controles, encabezados y estudio en móvil después del aumento.

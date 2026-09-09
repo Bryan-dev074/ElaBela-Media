@@ -1,7 +1,17 @@
-import { ArrowDownToLine, ArrowRight, Bookmark, ExternalLink, Plus, Search, Sparkles } from 'lucide-react';
+import { ArrowDownToLine, ArrowRight, Bookmark, ExternalLink, Plus, Search, Sparkles, X } from 'lucide-react';
 import { useRef, useState } from 'react';
+import {
+  matchesRadarTopic,
+  normalizeRadarText,
+  type RadarTopic,
+  type ResearchStyle,
+  radarResearchQuery,
+  radarTopics,
+} from '../../shared/radar';
 import { platformForSource } from '../../shared/sources';
 import type { Job, Trend } from '../../shared/types';
+import { OrbitRadar } from './OrbitRadar';
+import { SocialSource } from './SocialSource';
 import { Modal, ReferenceImage } from './ui';
 
 export function Radar({
@@ -26,63 +36,74 @@ export function Radar({
   researchProvider?: 'codex' | 'api';
 }) {
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('Todas');
+  const [topic, setTopic] = useState<RadarTopic>();
+  const [style, setStyle] = useState<ResearchStyle>('Inspiración');
+  const [source, setSource] = useState('Todas');
   const [detail, setDetail] = useState<Trend>();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [newQuery, setNewQuery] = useState(
-    'Estilos de carrusel de belleza y maquillaje para Paraguay y Brasil',
-  );
+  const [newQuery, setNewQuery] = useState(radarResearchQuery(undefined, 'Inspiración'));
   const input = useRef<HTMLInputElement>(null);
-  const categories = ['Todas', ...new Set(trends.map((trend) => trend.category))];
-  const filtered = trends.filter(
-    (trend) =>
-      (!savedOnly || trend.saved) &&
-      (category === 'Todas' || category === trend.category) &&
-      `${trend.title} ${trend.summary} ${trend.keywords.join(' ')}`
-        .toLocaleLowerCase()
-        .includes(query.toLocaleLowerCase()),
+  const topicTrends = trends.filter(
+    (trend) => (!savedOnly || trend.saved) && matchesRadarTopic(trend, topic),
   );
+  const sources = [...new Set(trends.map((trend) => platformForSource(trend.sourceUrl)))];
+  const filtered = topicTrends.filter(
+    (trend) =>
+      (source === 'Todas' || platformForSource(trend.sourceUrl) === source) &&
+      normalizeRadarText(`${trend.title} ${trend.summary} ${trend.keywords.join(' ')}`).includes(
+        normalizeRadarText(query),
+      ),
+  );
+  const searchBusy = searchJob?.status === 'running' || searchJob?.status === 'queued';
+  const prepareSearch = () => {
+    setNewQuery(radarResearchQuery(topic, style));
+    setSearchOpen(true);
+  };
+  const selectTopic = (next?: RadarTopic) => {
+    setTopic(next);
+    setQuery('');
+    setSource('Todas');
+  };
   const selected = detail ? trends.find((trend) => trend.id === detail.id) : undefined;
   return (
     <>
       <div className="page-intro">
         <div>
-          <div className="eyebrow">
-            {savedOnly ? 'Tu biblioteca de inspiración' : 'El comienzo de algo lindo'}
-          </div>
+          <div className="eyebrow">{savedOnly ? 'Tu biblioteca de inspiración' : 'Radar de tendencias'}</div>
           <h1>{savedOnly ? 'Ideas que querés guardar.' : 'Tu próxima gran idea está acá.'}</h1>
-          <p>Descubrí estilos, encontrá el producto perfecto y hacelo tuyo.</p>
+          <p>
+            {savedOnly
+              ? 'Tus referencias favoritas, listas para convertirse en una campaña.'
+              : 'Explorá, inspirate y encontrá una dirección para crear.'}
+          </p>
         </div>
-        <button
-          className="button"
-          type="button"
-          disabled={searchJob?.status === 'running' || searchJob?.status === 'queued'}
-          onClick={() => setSearchOpen(true)}
-        >
+        <button className="button" type="button" disabled={searchBusy} onClick={prepareSearch}>
           <Sparkles size={17} />
           {researchProvider === 'codex' ? 'Investigar con Codex' : 'Buscar nuevas ideas'}
         </button>
       </div>
+      {!savedOnly && (
+        <OrbitRadar
+          topic={topic}
+          style={style}
+          onTopic={selectTopic}
+          onStyle={setStyle}
+          onExplore={prepareSearch}
+          busy={searchBusy}
+          count={topicTrends.length}
+        />
+      )}
       {searchJob && (
         <div className="inline-notice" role="status">
           <Sparkles size={17} />
           <span>{searchJob.message}</span>
         </div>
       )}
-      <div className="radar-toolbar">
-        <fieldset className="tabs" aria-label="Categorías">
-          {categories.map((item) => (
-            <button
-              type="button"
-              key={item}
-              aria-pressed={category === item}
-              className={category === item ? 'active' : ''}
-              onClick={() => setCategory(item)}
-            >
-              {item}
-            </button>
-          ))}
-        </fieldset>
+      <div className="reference-heading">
+        <div>
+          <h2>{savedOnly ? 'Tu selección de ideas' : 'Biblioteca de referencias'}</h2>
+          <p>Imágenes, estilos y fuentes para darle forma a lo que viene.</p>
+        </div>
         <label className="search-field compact">
           <Search size={17} />
           <input
@@ -92,6 +113,42 @@ export function Radar({
             aria-label="Buscar en tus ideas"
           />
         </label>
+      </div>
+      <div className="reference-filters">
+        <label>
+          Categoría
+          <select
+            aria-label="Categoría de las referencias"
+            value={topic?.id || 'all'}
+            onChange={(event) => selectTopic(radarTopics.find((item) => item.id === event.target.value))}
+          >
+            <option value="all">Todas las categorías</option>
+            {radarTopics.map((item) => (
+              <option value={item.id} key={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Fuente
+          <select
+            aria-label="Fuente de las referencias"
+            value={source}
+            onChange={(event) => setSource(event.target.value)}
+          >
+            <option value="Todas">Todas las fuentes</option>
+            {sources.map((item) => (
+              <option key={item}>{item}</option>
+            ))}
+          </select>
+        </label>
+        {(topic || query || source !== 'Todas') && (
+          <button type="button" className="text-button" onClick={() => selectTopic(undefined)}>
+            <X size={13} />
+            Limpiar filtros
+          </button>
+        )}
       </div>
       <div className="collection-label">
         <span>
@@ -149,7 +206,7 @@ export function Radar({
               <span className="category-dot" style={{ background: trend.palette[0] }} />
               {trend.category}
               <span className="meta-separator">·</span>
-              {platformForSource(trend.sourceUrl)}
+              <SocialSource url={trend.sourceUrl} />
             </div>
             <button className="card-title" type="button" onClick={() => setDetail(trend)}>
               {trend.title}
@@ -175,7 +232,15 @@ export function Radar({
         <div className="empty-state">
           <Bookmark size={32} />
           <h2>{savedOnly ? 'Tus favoritas empiezan acá.' : 'Todavía no hay ideas con ese filtro.'}</h2>
-          <p>Guardá las referencias que te gusten o buscá una nueva dirección creativa.</p>
+          <p>
+            {topic
+              ? `Podés investigar nuevas ideas de ${topic.label.toLocaleLowerCase()} o explorar otra categoría.`
+              : 'Guardá las referencias que te gusten o buscá una nueva dirección creativa.'}
+          </p>
+          <button type="button" className="button secondary" disabled={searchBusy} onClick={prepareSearch}>
+            <Sparkles size={16} />
+            Investigar nuevas referencias
+          </button>
         </div>
       )}
       <div className="editorial-note">
@@ -212,14 +277,17 @@ export function Radar({
               ))}
             </div>
             <div className="trend-brief">
-              <span className="tag">{selected.sourceName}</span>
+              <span className="tag">
+                <SocialSource url={selected.sourceUrl} />
+              </span>
               <h3>Por qué puede funcionar con ElaBela</h3>
               <p>{selected.rationale}</p>
               <dl>
                 <div>
                   <dt>Dónde lo encontramos</dt>
                   <dd>
-                    {platformForSource(selected.sourceUrl)} · {selected.sourceName}
+                    <SocialSource url={selected.sourceUrl} />
+                    <span className="source-credit">{selected.sourceName}</span>
                   </dd>
                 </div>
                 <div>
@@ -254,8 +322,9 @@ export function Radar({
                 )}
               </dl>
               <a className="source-link" href={selected.sourceUrl} target="_blank" rel="noreferrer">
-                <ExternalLink size={16} />
-                Abrir fuente original · {platformForSource(selected.sourceUrl)}
+                <SocialSource url={selected.sourceUrl} />
+                <span>Abrir fuente original</span>
+                <ExternalLink size={14} />
               </a>
               <div className="detail-actions">
                 <button
@@ -287,10 +356,15 @@ export function Radar({
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            onSearch(newQuery);
+            if (working || searchBusy || !newQuery.trim()) return;
+            onSearch(newQuery.trim());
             setSearchOpen(false);
           }}
         >
+          <div className="search-direction-tags">
+            <span className="tag">{topic?.label || 'Todas las categorías'}</span>
+            <span className="tag">{style}</span>
+          </div>
           <label className="field">
             Qué querés encontrar
             <textarea
@@ -308,7 +382,7 @@ export function Radar({
               : 'Requiere el proveedor API de búsqueda configurado en la PC.'}
           </p>
           <div className="modal-actions">
-            <button className="button" type="submit" disabled={working || !newQuery.trim()}>
+            <button className="button" type="submit" disabled={working || searchBusy || !newQuery.trim()}>
               <Search size={17} />
               {researchProvider === 'codex' ? 'Iniciar investigación' : 'Buscar ideas'}
             </button>

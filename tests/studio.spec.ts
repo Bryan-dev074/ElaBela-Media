@@ -32,6 +32,18 @@ test('save inspiration, select PT copy, mix proposals, persist original quality 
   await expect(page.locator('.copy-choice')).toHaveCount(3);
   await page.locator('.copy-choice').nth(1).click();
   await page.getByLabel('Titular · pieza 1', { exact: true }).fill('Um detalhe, muitas possibilidades.');
+  await page.setViewportSize({ width: 390, height: 844 });
+  const copyAxe = (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze())
+    .violations;
+  expect(
+    copyAxe.map((v) => ({
+      id: v.id,
+      nodes: v.nodes.map((n) => ({ target: n.target, summary: n.failureSummary })),
+    })),
+  ).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+  await page.screenshot({ path: '.local/copy-mobile.png', fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.getByRole('button', { name: 'Elegir estos textos y continuar' }).click();
   for (let variant = 1; variant <= 3; variant++) {
     for (let slide = 1; slide <= 3; slide++) {

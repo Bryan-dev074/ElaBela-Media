@@ -45,11 +45,13 @@ Canvas porcelana lila, navegación berenjena, acciones moradas, tipografía ciru
 
 DM Sans variable para interfaz y Manrope variable para titulares, autoalojadas en WOFF2 Latin con licencia OFL. Segoe UI como fallback. Soporte de español/portugués y 61.768 bytes de fuentes en total. Marcas y SKU mantienen capitalización original; titulares directos, párrafos breves.
 
-Georgia del sistema se reserva al pequeño monograma decorativo «e.» de la nota editorial; no es una tercera fuente de lectura ni un recurso descargado. Escala funcional: cuerpo 14px, subtítulo 16px, sección 21px, página 32px; metadatos secundarios 10–12px. En el radar de teléfono, una columna con títulos 17px y descripción 13px evita comprimir la lectura en dos miniaturas.
+Georgia del sistema se reserva al pequeño monograma decorativo «e.» de la nota editorial; no es una tercera fuente de lectura ni un recurso descargado. A petición de Bryan, se aumentó la escala en toda la aplicación: metadatos desde 12px, apoyo 13px, lectura y controles 14–15px, titulares de referencia 17–18px, sección 21–25px y página 28–32px. Los cuatro tamaños menores son tokens `rem` para respetar el tamaño base del navegador. En teléfono se mantiene una columna con títulos 17px y descripciones 15px. La edición de textos usa contraste medido, también en índices, ayudas y contadores.
 
 ## Layout
 
 Sidebar 234px, header discreto con enlace de autor, contenido ancho con márgenes generosos. Radar de tres columnas en escritorio y referencias grandes. En Estudio, cada propuesta tiene su propia fila y el carrusel final es un destino separado. En móvil, navegación compacta y etapas secuenciales.
+
+Revisión solicitada por Bryan: el radar sigue la propuesta A que adjuntó, con una esfera violeta y seis categorías en órbita. La selección guía una investigación editable y filtra la biblioteca por temática. En escritorio el radar comparte espacio con el contexto de búsqueda; en móvil mantiene las seis posiciones alrededor del centro y sitúa el contexto debajo. La biblioteca tiene su propio título y filtros de fuente/formato; los logos identifican el dominio real del enlace. Guardados conserva acceso directo a las referencias.
 
 ## Elevation & Depth
 

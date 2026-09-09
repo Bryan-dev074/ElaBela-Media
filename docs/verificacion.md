@@ -7,19 +7,27 @@ Fecha: 9 de septiembre de 2026. Entorno real: Windows, PowerShell, Node 24.17.0,
 | Comprobación | Resultado observado |
 |---|---|
 | `npm run typecheck` | Correcto; TypeScript estricto |
-| `npm run lint` | 62 archivos sin errores ni advertencias de Biome |
-| `npm test` | 85 pruebas, 14 archivos, todas aprobadas |
+| `npm run lint` | 68 archivos sin errores ni advertencias de Biome |
+| `npm test` | 86 pruebas, 15 archivos, todas aprobadas |
 | `npm run build` | Build Vite correcto |
-| `npm run check:bundle` | 109,5 KiB gzip de JS inicial; presupuesto 220 KiB |
-| `npm run test:e2e` | 8 pruebas aprobadas en Chrome; puerto aislado 5187 |
+| `npm run check:bundle` | 112,9 KiB gzip de JS inicial; presupuesto 220 KiB |
+| `npm run test:e2e` | 11 pruebas aprobadas en Chrome; puerto aislado 5187 |
 | `npm audit --audit-level=high` | 0 vulnerabilidades reportadas |
-| Axe WCAG 2 A/AA y 2.1 AA | Sin infracciones medidas en radar móvil, estudio y confirmación |
+| Axe WCAG 2 A/AA y 2.1 AA | Sin infracciones medidas en radar escritorio/móvil, detalle de fuente, editor móvil, propuestas y confirmación |
 | Radar real con 8 ideas, incluida referencia faltante | Sin errores de página ni infracciones axe después de ajustar el contraste del placeholder |
 | Catálogo | 1.573 IDs únicos; 199 marcas y 61 categorías. Parser comprobado contra la fuente actual |
 
 Las pruebas de imágenes conservan los bytes originales, validan 4:5, generan 3×N piezas con transporte simulado, conservan salidas inválidas para revisión y comprueban orden sin destruir propuestas. Las pruebas Meta no hacen publicaciones; validan claims atómicos, revisión aprobada, checkpoints, fallos ambiguos, conciliación de solo lectura, orden y comparación local de imágenes. El publicador externo existente se verificó con sus 66 pruebas durante el reconocimiento inicial y quedó sin modificaciones.
 
-Las ocho pruebas del navegador cubren PT-BR, textos, mezcla de propuestas por arrastre y botones, recarga, descarga original idéntica, publicación simulada confirmada, actualización de revisión, borradores guardados/sin guardar, conflictos, respuestas antiguas que llegan después de un texto nuevo y foco de navegación móvil. Las imágenes de fixtures dicen PRUEBA y el transporte de publicación identifica explícitamente que no envió nada a Meta.
+Las pruebas del navegador cubren PT-BR, textos, mezcla de propuestas por arrastre y botones, recarga, descarga original idéntica, publicación simulada confirmada, actualización de revisión, borradores guardados/sin guardar, conflictos, respuestas antiguas que llegan después de un texto nuevo y foco de navegación móvil. La revisión del radar añade selección orbital y consulta editable, filtros ES/PT, cinco logos desde dominios reales, fallback de webs, favoritos y categorías por teclado/tacto a 320px. Las imágenes de fixtures dicen PRUEBA y el transporte de publicación identifica explícitamente que no envió nada a Meta.
+
+### Revisión solicitada: radar A y textos más legibles
+
+La biblioteca real se revisó con 8 ideas y una selección de maquillaje. Medición en 15 anchos entre 320 y 1440px: sin scroll horizontal del documento ni superposición entre botones del radar. Capturas de escritorio y móvil, y detalle de fuente, sin errores axe WCAG AA. El editor de textos en móvil detectó 11 instancias con contraste insuficiente; se oscurecieron índices, estados, contadores y ayuda, y la prueba completa pasó después de corregirlas. Los textos habituales pasaron de 10–12px a 14–15px y los metadatos a un mínimo de 12px.
+
+La prueba de junctions del publicador ahora espera la eliminación efectiva del lock tras finalizar el trabajo. La ejecución CI anterior encontró una carrera en esa preparación de fixtures; el cambio no modifica el publicador ni permite reintentos de publicación.
+
+La revisión independiente del radar aprobó requisitos y calidad. Detectó un detalle menor del filtro: «unas ideas» coincidía con Uñas al quitar la tilde. Se corrigió preservando la letra ñ y se añadió regresión para español en NFC/NFD y portugués. Detector Impeccable acotado a los tres componentes del radar: sin hallazgos; no equivale a reejecutar la auditoría global anterior.
 
 ## Investigación real desde el botón
 

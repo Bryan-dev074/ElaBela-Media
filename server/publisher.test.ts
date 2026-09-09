@@ -1,4 +1,4 @@
-import { cp, mkdir, mkdtemp, readFile, rename, rm, symlink } from 'node:fs/promises';
+import { access, cp, mkdir, mkdtemp, readFile, rename, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import sharp from 'sharp';
@@ -396,6 +396,14 @@ describe('Meta worker publication and reconciliation', () => {
       store: data.store,
     });
     await vi.waitFor(async () => expect((await data.store.bootstrap()).jobs[0]?.status).toBe('completed'));
+    // The job status is persisted before the publisher's finally releases its lock.
+    // Move the fixture directory only after that cleanup, so this tests confinement, not contention.
+    await vi.waitFor(async () => {
+      await expect(access(join(data.root, '.local', 'meta-publisher.lock'))).rejects.toHaveProperty(
+        'code',
+        'ENOENT',
+      );
+    });
     const outside = await mkdtemp(join(tmpdir(), 'elabela-junction-review-'));
     roots.push(outside);
     const originalContent = join(data.root, 'contenido');
