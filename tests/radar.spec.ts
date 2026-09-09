@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page, test } from '@playwright/test';
-import type { Bootstrap, Trend } from '../shared/types';
+import type { Bootstrap, Job, Trend } from '../shared/types';
 
 async function radarFixture(page: Page) {
   const sources = [
@@ -56,7 +56,19 @@ async function radarFixture(page: Page) {
     if (path === '/api/bootstrap') return route.fulfill({ json: state });
     if (path === '/api/trends/search' && request.method() === 'POST') {
       searches.push((request.postDataJSON() as { query: string }).query);
-      return route.fulfill({ json: { id: 'search-test', status: 'queued' } });
+      const now = new Date().toISOString();
+      const job: Job = {
+        id: 'search-test',
+        type: 'search',
+        status: 'queued',
+        total: 1,
+        completed: 0,
+        message: 'Investigación simulada en cola.',
+        createdAt: now,
+        updatedAt: now,
+      };
+      state.jobs = [job];
+      return route.fulfill({ json: job });
     }
     if (request.method() === 'PATCH' && path.startsWith('/api/trends/')) {
       const trend = trends.find((item) => path.endsWith(`/${item.id}`));
@@ -70,6 +82,41 @@ async function radarFixture(page: Page) {
   await expect(page.getByRole('heading', { name: 'Tu próxima gran idea está acá.' })).toBeVisible();
   return { searches };
 }
+
+test('explore all categories opens general research, clears earlier filters and preserves creative style', async ({
+  page,
+}) => {
+  const fixture = await radarFixture(page);
+  const exploreAll = page.getByRole('button', { name: 'Explorar todas las categorías', exact: true });
+  await exploreAll.click();
+  const query = page.getByRole('textbox', { name: 'Qué querés encontrar' });
+  await expect(query).toBeVisible();
+  await expect(query).toHaveValue(/sobre belleza y cosméticos/);
+  expect(fixture.searches).toEqual([]);
+  await page.keyboard.press('Escape');
+  await expect(exploreAll).toBeFocused();
+
+  await page
+    .getByRole('group', { name: 'Categorías del radar' })
+    .getByRole('button', { name: 'Skincare', exact: true })
+    .click();
+  await page.getByRole('button', { name: 'Humor', exact: true }).click();
+  await page.getByLabel('Fuente de las referencias').selectOption('Facebook');
+  await page.getByLabel('Buscar en tus ideas').fill('facial');
+  await expect(page.locator('.trend-card')).toHaveCount(1);
+  await exploreAll.click();
+  await expect(query).toHaveValue(/humor sobre belleza y cosméticos/);
+  await expect(page.locator('.search-direction-tags')).toContainText('Todas las categorías');
+  await expect(page.getByLabel('Categoría de las referencias')).toHaveValue('all');
+  await expect(page.getByLabel('Fuente de las referencias')).toHaveValue('Todas');
+  await expect(page.getByLabel('Buscar en tus ideas')).toHaveValue('');
+  await expect(page.locator('.trend-card')).toHaveCount(7);
+  expect(fixture.searches).toEqual([]);
+  await query.fill('Humor sobre belleza y cosméticos para ElaBela.');
+  await page.getByRole('button', { name: 'Iniciar investigación', exact: true }).click();
+  await expect.poll(() => fixture.searches).toEqual(['Humor sobre belleza y cosméticos para ElaBela.']);
+  await expect(exploreAll).toBeDisabled();
+});
 
 test('orbital topic and creative style guide the editable Codex research request and reference filtering', async ({
   page,

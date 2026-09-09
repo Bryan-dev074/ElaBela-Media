@@ -206,8 +206,6 @@
 .orbit-reset {
   margin-top: 13px;
   font-size: var(--text-body);
-}
-.orbit-reset[aria-pressed="true"] {
   color: var(--ink);
 }
 .radar-direction {

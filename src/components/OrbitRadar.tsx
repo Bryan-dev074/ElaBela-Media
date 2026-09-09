@@ -16,6 +16,7 @@ export function OrbitRadar({
   onTopic,
   onStyle,
   onExplore,
+  onExploreAll,
   busy,
   count,
 }: {
@@ -24,6 +25,7 @@ export function OrbitRadar({
   onTopic: (topic?: RadarTopic) => void;
   onStyle: (style: ResearchStyle) => void;
   onExplore: () => void;
+  onExploreAll: () => void;
   busy: boolean;
   count: number;
 }) {
@@ -86,12 +88,7 @@ export function OrbitRadar({
             );
           })}
         </fieldset>
-        <button
-          type="button"
-          className="text-button orbit-reset"
-          aria-pressed={!topic}
-          onClick={() => onTopic(undefined)}
-        >
+        <button type="button" className="text-button orbit-reset" disabled={busy} onClick={onExploreAll}>
           Explorar todas las categorías <ArrowRight size={13} aria-hidden="true" />
         </button>
       </div>

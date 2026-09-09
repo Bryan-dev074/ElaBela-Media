@@ -12,7 +12,7 @@ Requisitos: Windows, Node 24.17 o posterior de la rama 24, npm, y el publicador 
 
 ## Flujo de trabajo
 
-1. **Radar creativo:** elegí Maquillaje, Skincare, Uñas, Fragancias, Cabello o Estilo de vida alrededor de la esfera. La selección filtra la biblioteca y orienta la próxima búsqueda. Elegí inspiración, carruseles, tutoriales, humor o diseño de producto; **Preparar búsqueda** permite ajustar el texto antes de iniciar Codex en esta PC. Las referencias muestran imagen, logo de la plataforma, fuente, fecha y motivo. Guardá las favoritas; sobreviven a nuevas búsquedas.
+1. **Radar creativo:** elegí Maquillaje, Skincare, Uñas, Fragancias, Cabello o Estilo de vida alrededor de la esfera. La selección filtra la biblioteca y orienta la próxima búsqueda. Elegí inspiración, carruseles, tutoriales, humor o diseño de producto. **Explorar todas las categorías** abre la búsqueda general, limpia los filtros y conserva el estilo elegido. Revisá el texto y pulsá **Iniciar investigación** para usar Codex en esta PC. Las referencias muestran imagen, logo de la plataforma, fuente, fecha y motivo. Guardá las favoritas; sobreviven a nuevas búsquedas.
 2. **Crear campaña:** elegí productos, español/PT-BR y entre 1 y 10 piezas. Tres propuestas de tres piezas son nueve imágenes separadas.
 3. **Textos:** elegí y editá una de las tres opciones de titulares, textos de cada imagen y descripción. Aprobá antes de generar.
 4. **Propuestas:** generá las piezas o importá PNG/JPEG/WebP 4:5. Cada propuesta conserva sus originales; podés regenerar una pieza individual.

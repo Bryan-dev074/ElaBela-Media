@@ -43,6 +43,7 @@ export function Radar({
   const [searchOpen, setSearchOpen] = useState(false);
   const [newQuery, setNewQuery] = useState(radarResearchQuery(undefined, 'Inspiración'));
   const input = useRef<HTMLInputElement>(null);
+  const searchTrigger = useRef<HTMLElement | null>(null);
   const topicTrends = trends.filter(
     (trend) => (!savedOnly || trend.saved) && matchesRadarTopic(trend, topic),
   );
@@ -55,14 +56,22 @@ export function Radar({
       ),
   );
   const searchBusy = searchJob?.status === 'running' || searchJob?.status === 'queued';
-  const prepareSearch = () => {
-    setNewQuery(radarResearchQuery(topic, style));
+  const openSearch = (searchTopic: RadarTopic | undefined) => {
+    if (searchBusy) return;
+    searchTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setNewQuery(radarResearchQuery(searchTopic, style));
     setSearchOpen(true);
   };
+  const prepareSearch = () => openSearch(topic);
   const selectTopic = (next?: RadarTopic) => {
     setTopic(next);
     setQuery('');
     setSource('Todas');
+  };
+  const exploreAll = () => {
+    if (searchBusy) return;
+    selectTopic(undefined);
+    openSearch(undefined);
   };
   const selected = detail ? trends.find((trend) => trend.id === detail.id) : undefined;
   return (
@@ -89,6 +98,7 @@ export function Radar({
           onTopic={selectTopic}
           onStyle={setStyle}
           onExplore={prepareSearch}
+          onExploreAll={exploreAll}
           busy={searchBusy}
           count={topicTrends.length}
         />
@@ -349,6 +359,7 @@ export function Radar({
       </Modal>
       <Modal
         open={searchOpen}
+        returnFocusTo={searchTrigger.current}
         onClose={() => setSearchOpen(false)}
         title="Busquemos algo nuevo"
         description="Tendencias, estilos visuales, tutoriales o humor: contá qué te gustaría explorar."
@@ -376,7 +387,7 @@ export function Radar({
             />
           </label>
           <p className="help-text">
-            La búsqueda guardará sus fuentes y resultados. Después elegís cuáles conservar en tus favoritos.
+            La búsqueda guardará sus fuentes y resultados. Después elegís cuáles conservar en tus favoritos.{' '}
             {researchProvider === 'codex'
               ? 'Codex investigará en esta PC con tu sesión. Puede demorar unos minutos y utiliza los límites de tu cuenta.'
               : 'Requiere el proveedor API de búsqueda configurado en la PC.'}

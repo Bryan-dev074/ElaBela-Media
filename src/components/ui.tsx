@@ -12,6 +12,7 @@ export function Modal({
   description,
   children,
   wide = false,
+  returnFocusTo,
 }: {
   open: boolean;
   onClose: () => void;
@@ -19,6 +20,7 @@ export function Modal({
   description?: string;
   children: ReactNode;
   wide?: boolean;
+  returnFocusTo?: HTMLElement | null;
 }) {
   return (
     <Dialog.Root
@@ -29,7 +31,15 @@ export function Modal({
     >
       <Dialog.Portal>
         <Dialog.Overlay className="modal-overlay" />
-        <Dialog.Content className={`modal ${wide ? 'modal-wide' : ''}`}>
+        <Dialog.Content
+          className={`modal ${wide ? 'modal-wide' : ''}`}
+          onCloseAutoFocus={(event) => {
+            if (returnFocusTo?.isConnected && !returnFocusTo.matches(':disabled')) {
+              event.preventDefault();
+              returnFocusTo.focus();
+            }
+          }}
+        >
           <div className="modal-heading">
             <Dialog.Title>{title}</Dialog.Title>
             <Dialog.Close className="icon-button" aria-label="Cerrar">
