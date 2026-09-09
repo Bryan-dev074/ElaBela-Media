@@ -86,11 +86,37 @@ export function Radar({
               : 'Explorá, inspirate y encontrá una dirección para crear.'}
           </p>
         </div>
-        <button className="button" type="button" disabled={searchBusy} onClick={prepareSearch}>
+        <button
+          className="button"
+          type="button"
+          disabled={searchBusy}
+          aria-describedby={searchBusy ? 'research-status' : undefined}
+          onClick={prepareSearch}
+        >
           <Sparkles size={17} />
-          {researchProvider === 'codex' ? 'Investigar con Codex' : 'Buscar nuevas ideas'}
+          {searchBusy
+            ? searchJob.status === 'queued'
+              ? 'Investigación en cola…'
+              : 'Investigando…'
+            : researchProvider === 'codex'
+              ? 'Investigar con Codex'
+              : 'Buscar nuevas ideas'}
         </button>
       </div>
+      {searchJob && (
+        <div id="research-status" className="inline-notice" role="status">
+          <Sparkles size={17} aria-hidden="true" />
+          <span>
+            {searchJob.message}
+            {searchBusy && (
+              <>
+                <br />
+                Podrás iniciar otra búsqueda cuando termine.
+              </>
+            )}
+          </span>
+        </div>
+      )}
       {!savedOnly && (
         <OrbitRadar
           topic={topic}
@@ -102,12 +128,6 @@ export function Radar({
           busy={searchBusy}
           count={topicTrends.length}
         />
-      )}
-      {searchJob && (
-        <div className="inline-notice" role="status">
-          <Sparkles size={17} />
-          <span>{searchJob.message}</span>
-        </div>
       )}
       <div className="reference-heading">
         <div>

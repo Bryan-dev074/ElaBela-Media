@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page, test } from '@playwright/test';
 import type { Bootstrap, Job, Trend } from '../shared/types';
 
-async function radarFixture(page: Page) {
+async function radarFixture(page: Page, jobs: Job[] = []) {
   const sources = [
     ['nails', 'Unhas em azul', 'Esmaltes', 'https://www.instagram.com/p/test/', 'Pinterest'],
     ['makeup', 'Gloss protagonista', 'Labios', 'https://business.pinterest.com/report/', 'Instagram'],
@@ -36,7 +36,7 @@ async function radarFixture(page: Page) {
     trends,
     campaigns: [],
     assets: [],
-    jobs: [],
+    jobs,
     status: {
       connected: true,
       researchProvider: 'codex',
@@ -80,7 +80,59 @@ async function radarFixture(page: Page) {
   });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Tu próxima gran idea está acá.' })).toBeVisible();
-  return { searches };
+  return { searches, state };
+}
+
+for (const terminalStatus of ['completed', 'failed', 'interrupted'] as const) {
+  test(`research explains its busy state and unlocks automatically after ${terminalStatus}`, async ({
+    page,
+  }) => {
+    const now = new Date().toISOString();
+    const job: Job = {
+      id: 'active-research',
+      type: 'search',
+      status: 'queued',
+      total: 1,
+      completed: 0,
+      message: 'Investigación en cola de prueba.',
+      createdAt: now,
+      updatedAt: now,
+    };
+    const { state, searches } = await radarFixture(page, [job]);
+    const button = page.locator('.page-intro').getByRole('button');
+    await expect(button).toHaveText('Investigación en cola…');
+    await expect(button).toBeDisabled();
+    const progress = page.locator('#research-status');
+    await expect(progress).toContainText('Podrás iniciar otra búsqueda cuando termine.');
+    await expect(progress).toBeInViewport();
+    const progressBox = await progress.boundingBox();
+    const radarBox = await page.locator('.radar-discovery').boundingBox();
+    expect(progressBox).not.toBeNull();
+    expect(radarBox).not.toBeNull();
+    expect((progressBox?.y ?? 0) + (progressBox?.height ?? 0)).toBeLessThan(radarBox?.y ?? 0);
+
+    state.jobs = [
+      { ...job, status: 'running', message: 'Codex está contrastando fuentes · 5 consultas realizadas' },
+    ];
+    await expect(button).toHaveText('Investigando…');
+    await expect(button).toBeDisabled();
+    await expect(progress).toContainText('5 consultas realizadas');
+    await expect(
+      page.getByRole('button', { name: 'Explorar todas las categorías', exact: true }),
+    ).toBeDisabled();
+
+    state.jobs = [{ ...job, status: terminalStatus, message: `Investigación de prueba: ${terminalStatus}.` }];
+    await expect(button).toHaveText('Investigar con Codex');
+    await expect(button).toBeEnabled();
+    await expect(progress).toContainText(`Investigación de prueba: ${terminalStatus}.`);
+    await expect(progress).not.toContainText('Podrás iniciar otra búsqueda cuando termine.');
+    await expect(
+      page.getByRole('button', { name: 'Explorar todas las categorías', exact: true }),
+    ).toBeEnabled();
+    await button.click();
+    await expect(page.getByRole('textbox', { name: 'Qué querés encontrar' })).toBeVisible();
+    expect(searches).toEqual([]);
+  });
 }
 
 test('explore all categories opens general research, clears earlier filters and preserves creative style', async ({

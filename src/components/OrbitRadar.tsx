@@ -88,7 +88,13 @@ export function OrbitRadar({
             );
           })}
         </fieldset>
-        <button type="button" className="text-button orbit-reset" disabled={busy} onClick={onExploreAll}>
+        <button
+          type="button"
+          className="text-button orbit-reset"
+          disabled={busy}
+          aria-describedby={busy ? 'research-status' : undefined}
+          onClick={onExploreAll}
+        >
           Explorar todas las categorías <ArrowRight size={13} aria-hidden="true" />
         </button>
       </div>
@@ -110,10 +116,20 @@ export function OrbitRadar({
             </button>
           ))}
         </fieldset>
-        <button className="button direction-search" type="button" disabled={busy} onClick={onExplore}>
-          Preparar búsqueda <ArrowRight size={16} aria-hidden="true" />
+        <button
+          className="button direction-search"
+          type="button"
+          disabled={busy}
+          aria-describedby={busy ? 'research-status' : undefined}
+          onClick={onExplore}
+        >
+          {busy ? 'Investigación en curso' : 'Preparar búsqueda'} <ArrowRight size={16} aria-hidden="true" />
         </button>
-        <p className="direction-note">Podés ajustar la búsqueda antes de empezar.</p>
+        <p className="direction-note">
+          {busy
+            ? 'Mientras tanto, podés explorar y guardar tus referencias.'
+            : 'Podés ajustar la búsqueda antes de empezar.'}
+        </p>
         <div className="direction-library" role="status">
           <span className="direction-library-count">{count}</span>
           <span>

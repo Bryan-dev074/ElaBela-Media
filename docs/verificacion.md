@@ -10,8 +10,8 @@ Fecha: 9 de septiembre de 2026. Entorno real: Windows, PowerShell, Node 24.17.0,
 | `npm run lint` | 68 archivos sin errores ni advertencias de Biome |
 | `npm test` | 86 pruebas, 15 archivos, todas aprobadas |
 | `npm run build` | Build Vite correcto |
-| `npm run check:bundle` | 113,0 KiB gzip de JS inicial; presupuesto 220 KiB |
-| `npm run test:e2e` | 12 pruebas aprobadas en Chrome; puerto aislado 5187 |
+| `npm run check:bundle` | 113,1 KiB gzip de JS inicial; presupuesto 220 KiB |
+| `npm run test:e2e` | 15 pruebas aprobadas en Chrome; puerto aislado 5187 |
 | `npm audit --audit-level=high` | 0 vulnerabilidades reportadas |
 | Axe WCAG 2 A/AA y 2.1 AA | Sin infracciones medidas en radar escritorio/móvil, detalle de fuente, editor móvil, propuestas y confirmación |
 | Radar real con 8 ideas, incluida referencia faltante | Sin errores de página ni infracciones axe después de ajustar el contraste del placeholder |
@@ -34,6 +34,8 @@ La revisión independiente del radar aprobó requisitos y calidad. Detectó un d
 El botón sólo limpiaba filtros y no mostraba ningún cambio cuando ya estaban todas las categorías seleccionadas. Ahora abre el diálogo de investigación general, restablece los filtros y conserva el estilo creativo. El texto sigue editable y la investigación empieza sólo al enviar el formulario. Escape devuelve el foco al botón que lo abrió; el acceso se desactiva mientras hay una investigación en cola o en curso.
 
 La regresión reprodujo primero el fallo y pasó tras la corrección. Comprueba apertura inicial y desde Skincare con filtros, conservación de Humor, envío único del texto editado y bloqueo durante el trabajo simulado. En la página local con ocho ideas se comprobó apertura, cierre, foco y ausencia de errores; axe no detectó infracciones en el diálogo de escritorio y móvil después de finalizar su animación de entrada. Esta comprobación no inició investigaciones, generación ni publicaciones reales.
+
+El estado de una investigación ahora aparece encima del radar y el botón indica «Investigando…» o «Investigación en cola…». Tres regresiones comprueban el progreso y la habilitación automática, sin recargar, al completar, fallar o interrumpirse el trabajo. La búsqueda real iniciada por Bryan a las 12:54 terminó a las 12:56 con tres ideas adicionales (11 en la biblioteca); no se canceló ni se repitió para desbloquear el botón.
 
 ## Investigación real desde el botón
 
