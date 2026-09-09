@@ -51,4 +51,4 @@ Se revisaron y corrigieron: identidad de imágenes Meta, junctions externos, apr
 - No se ejecutó generación de campaña mediante API de imágenes: falta configurar la clave local y elegir/aprobar una campaña.
 - No se publicó contenido real en Instagram/Facebook. Permisos y respuesta actuales de Meta se comprobarán al publicar la primera campaña aprobada; una coincidencia visual no recupera un ID IG perdido.
 - Vercel queda preparado como frontend estático. Bryan realizará el despliegue y entonces podrá comprobarse el permiso de red local y emparejamiento del dominio HTTPS real.
-- GitHub Actions está configurado para repetir las comprobaciones en Linux. Su resultado remoto se consulta después del push, por separado de estas pruebas Windows.
+- GitHub Actions repitió todas las comprobaciones en Linux: tipos, lint, 85 tests, build, presupuesto, navegador y auditoría aprobaron en la [ejecución 34362563333](https://github.com/Bryan-dev074/ElaBela-Media/actions/runs/34362563333), correspondiente al commit de implementación `5f7e232`. El SHA de `main` se contrastó con el remoto después del push.

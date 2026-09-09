@@ -75,10 +75,10 @@ Files: `tests/studio.spec.ts`, `playwright.config.ts`, `.github/workflows/ci.yml
 - [x] Ejecutar typecheck, lint, tests, build, E2E, bundle y audit; corregir fallos relevantes.
 - [x] Revisor independiente de código y revisión visual Impeccable; aplicar observaciones importantes.
 - [x] Preparar inicio local sin instalación permanente y conexión Vercel configurable.
-- [ ] Revisar secretos, gitignore y diff; commit/push al repo autorizado; confirmar SHA remoto y CI. No desplegar Vercel por Bryan.
+- [x] Revisar secretos, gitignore y diff; commit/push al repo autorizado. SHA remoto confirmado; estado CI registrado en el informe de verificación. Vercel queda a cargo de Bryan.
 
 ## Progress
 
 - 2026-09-09: diagnóstico, catálogo 1573 y lectura Meta verificados. Usuario confirmó ES/PT-BR, tres opciones y composición entre propuestas; delegó mejoras de manejo. Implementación iniciada.
 
-- 2026-09-09: implementación y revisión independiente terminadas. 85 tests de servicio, 8 E2E, build/lint/tipos, axe y auditoría aprobados. Botón Codex probado con dos hallazgos nuevos. Resta registrar entrega Git/CI.
+- 2026-09-09: implementación y revisión independiente terminadas. 85 tests de servicio, 8 E2E, build/lint/tipos, axe y auditoría aprobados. Botón Codex probado con dos hallazgos nuevos. Primera entrega subida a main (5f7e232), SHA remoto confirmado; CI Linux 34362563333 aprobada.
