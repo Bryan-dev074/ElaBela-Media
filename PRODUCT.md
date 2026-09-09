@@ -30,11 +30,11 @@ Un estudio específico para ElaBela, conectado a su catálogo y al publicador qu
 
 ## Capabilities and Constraints
 
-Implementado: radar de ideas con fuentes y referencias, catálogo paginado, piezas individuales y carruseles 4:5, logo suministrado, visor/descarga de originales, carpetas de campaña y publicación con confirmación. El botón inicia la investigación con Codex en esta PC usando su sesión. La generación de imágenes desde la web requiere clave API local; no se generaron campañas pagas durante el desarrollo.
+Implementado: radar con referencias visuales específicas de cosméticos, elección de imagen base, catálogo paginado, piezas individuales y carruseles 4:5, visor/descarga de originales, carpetas de campaña y publicación con confirmación. El botón inicia la investigación con Codex en esta PC usando su sesión. La generación predeterminada prepara un pedido para este chat e importa sus originales por propuesta y posición, sin exigir clave API. La página no inicia por sí sola la herramienta de imágenes del chat.
 
 Los archivos y secretos de trabajo deben conservarse en esta PC. Los servicios externos necesariamente reciben el contenido cuando se usa generación en la nube o se publica en Meta. Una página en Vercel necesita un servicio local para actuar sobre `D:`; no tiene acceso directo al disco.
 
-Confirmado por Bryan: español y PT-BR por campaña; elegir idea, productos, cantidad y textos antes de generar tres propuestas completas. Puede mezclar sus piezas en un carrusel final independiente. Bryan delegó mejoras de manejo; se implementaron arrastre y botones accesibles. Pendientes externos: configurar clave API y desplegar su dominio Vercel. Acceso desde otros dispositivos queda fuera del alcance actual.
+Confirmado por Bryan: español y PT-BR por campaña; elegir referencia visual, productos, cantidad y textos antes de generar tres propuestas completas en el chat. Puede mezclar sus piezas en un carrusel final independiente. Bryan delegó mejoras de manejo; se implementaron arrastre y botones accesibles. Pendientes externos: primera campaña aprobada con generación real del chat y despliegue de su dominio Vercel. Acceso desde otros dispositivos queda fuera del alcance actual.
 
 ## Brand Commitments
 

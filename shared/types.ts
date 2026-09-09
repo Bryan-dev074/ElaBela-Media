@@ -16,6 +16,7 @@ export interface Reference {
   url: string;
   title: string;
   assetId?: string;
+  sourceUrl?: string;
 }
 export interface Trend {
   id: string;
@@ -34,6 +35,8 @@ export interface Trend {
   productIds: string[];
   suggestedSlides: number;
   references: Reference[];
+  visualStatus?: 'example' | 'context' | 'unavailable';
+  visualReason?: string;
   saved: boolean;
   palette: string[];
   keywords: string[];
@@ -76,6 +79,7 @@ export interface Campaign {
   id: string;
   title: string;
   trendId: string;
+  referenceId?: string;
   productIds: string[];
   language: Language;
   slideCount: number;
@@ -90,6 +94,25 @@ export interface Campaign {
   createdAt: string;
   updatedAt: string;
   publication?: Publication;
+  codexRequest?: CodexGenerationRequest;
+}
+export interface CodexGenerationRequest {
+  id: string;
+  createdAt: string;
+  status: 'ready' | 'partial' | 'completed' | 'cancelled';
+  briefPath: string;
+  manifestPath: string;
+  instruction: string;
+  contentHash: string;
+  total: number;
+  completed: number;
+  targets: {
+    variantId: string;
+    slot: number;
+    originalAssetId: string | null;
+    assetId?: string;
+    sha256?: string;
+  }[];
 }
 export interface Job {
   id: string;
@@ -106,6 +129,7 @@ export interface ServiceStatus {
   connected: boolean;
   researchProvider?: 'codex' | 'api';
   researchReady?: boolean;
+  generationProvider?: 'codex-chat' | 'api';
   generationConfigured: boolean;
   metaConfigured: boolean;
   catalogueCount: number;
@@ -122,6 +146,7 @@ export interface Bootstrap {
 export interface CreateCampaign {
   title: string;
   trendId: string;
+  referenceId?: string;
   productIds: string[];
   language: Language;
   slideCount: number;

@@ -1,4 +1,15 @@
-import { ArrowDownToLine, ArrowRight, Bookmark, ExternalLink, Plus, Search, Sparkles, X } from 'lucide-react';
+import {
+  ArrowDownToLine,
+  ArrowRight,
+  Bookmark,
+  Check,
+  ExternalLink,
+  Plus,
+  Search,
+  Sparkles,
+  X,
+  ZoomIn,
+} from 'lucide-react';
 import { useRef, useState } from 'react';
 import {
   matchesRadarTopic,
@@ -9,7 +20,7 @@ import {
   radarTopics,
 } from '../../shared/radar';
 import { platformForSource } from '../../shared/sources';
-import type { Job, Trend } from '../../shared/types';
+import type { Job, Reference, Trend } from '../../shared/types';
 import { OrbitRadar } from './OrbitRadar';
 import { SocialSource } from './SocialSource';
 import { Modal, ReferenceImage } from './ui';
@@ -28,7 +39,7 @@ export function Radar({
   trends: Trend[];
   savedOnly: boolean;
   onSave: (trend: Trend) => void;
-  onUse: (trend: Trend) => void;
+  onUse: (trend: Trend, referenceId?: string) => void;
   onSearch: (query: string) => void;
   onImport: (file: File) => void;
   working: boolean;
@@ -40,16 +51,22 @@ export function Radar({
   const [style, setStyle] = useState<ResearchStyle>('Inspiración');
   const [source, setSource] = useState('Todas');
   const [detail, setDetail] = useState<Trend>();
+  const [collection, setCollection] = useState<'visual' | 'all'>(savedOnly ? 'all' : 'visual');
+  const [chosenReference, setChosenReference] = useState<string>();
+  const [previewReference, setPreviewReference] = useState<Reference>();
   const [searchOpen, setSearchOpen] = useState(false);
   const [newQuery, setNewQuery] = useState(radarResearchQuery(undefined, 'Inspiración'));
   const input = useRef<HTMLInputElement>(null);
   const searchTrigger = useRef<HTMLElement | null>(null);
+  const previewTrigger = useRef<HTMLElement | null>(null);
   const topicTrends = trends.filter(
     (trend) => (!savedOnly || trend.saved) && matchesRadarTopic(trend, topic),
   );
   const sources = [...new Set(trends.map((trend) => platformForSource(trend.sourceUrl)))];
   const filtered = topicTrends.filter(
     (trend) =>
+      (collection === 'all' ||
+        (trend.references.length > 0 && !['context', 'unavailable'].includes(trend.visualStatus || ''))) &&
       (source === 'Todas' || platformForSource(trend.sourceUrl) === source) &&
       normalizeRadarText(`${trend.title} ${trend.summary} ${trend.keywords.join(' ')}`).includes(
         normalizeRadarText(query),
@@ -74,6 +91,14 @@ export function Radar({
     openSearch(undefined);
   };
   const selected = detail ? trends.find((trend) => trend.id === detail.id) : undefined;
+  const needsReference =
+    !!selected?.references.length &&
+    !['context', 'unavailable'].includes(selected.visualStatus || '') &&
+    !chosenReference;
+  const openDetail = (trend: Trend) => {
+    setChosenReference(undefined);
+    setDetail(trend);
+  };
   return (
     <>
       <div className="page-intro">
@@ -144,6 +169,14 @@ export function Radar({
           />
         </label>
       </div>
+      <fieldset className="reference-views" aria-label="Vista de la biblioteca">
+        <button type="button" aria-pressed={collection === 'visual'} onClick={() => setCollection('visual')}>
+          Referencias visuales
+        </button>
+        <button type="button" aria-pressed={collection === 'all'} onClick={() => setCollection('all')}>
+          Todas las ideas
+        </button>
+      </fieldset>
       <div className="reference-filters">
         <label>
           Categoría
@@ -204,18 +237,22 @@ export function Radar({
           />
         </div>
       </div>
-      <div className="trend-grid">
+      <div className={`trend-grid ${collection === 'visual' ? 'visual-library' : ''}`}>
         {filtered.map((trend, index) => (
           <article className={`trend-card ${index === 0 ? 'feature-trend' : ''}`} key={trend.id}>
             <div className="trend-image-wrap">
               <button
                 className="trend-image"
                 type="button"
-                onClick={() => setDetail(trend)}
+                onClick={() => openDetail(trend)}
                 aria-label={`Ver idea: ${trend.title}`}
               >
                 <ReferenceImage
-                  reference={trend.references[0]}
+                  reference={
+                    ['context', 'unavailable'].includes(trend.visualStatus || '')
+                      ? undefined
+                      : trend.references[0]
+                  }
                   alt={trend.references[0]?.title || trend.title}
                 />
                 <span className="format-label">
@@ -238,11 +275,14 @@ export function Radar({
               <span className="meta-separator">·</span>
               <SocialSource url={trend.sourceUrl} />
             </div>
-            <button className="card-title" type="button" onClick={() => setDetail(trend)}>
+            <button className="card-title" type="button" onClick={() => openDetail(trend)}>
               {trend.title}
               <ArrowRight size={18} />
             </button>
             <p>{trend.summary}</p>
+            {trend.visualStatus !== 'example' && trend.visualReason && (
+              <p className="help-text">{trend.visualReason}</p>
+            )}
             <div className="trend-footer">
               <span>
                 {trend.evidence === 'annual'
@@ -261,12 +301,23 @@ export function Radar({
       {filtered.length === 0 && (
         <div className="empty-state">
           <Bookmark size={32} />
-          <h2>{savedOnly ? 'Tus favoritas empiezan acá.' : 'Todavía no hay ideas con ese filtro.'}</h2>
+          <h2>
+            {savedOnly
+              ? 'Tus favoritas empiezan acá.'
+              : collection === 'visual'
+                ? 'Todavía no hay referencias visuales con ese filtro.'
+                : 'Todavía no hay ideas con ese filtro.'}
+          </h2>
           <p>
             {topic
               ? `Podés investigar nuevas ideas de ${topic.label.toLocaleLowerCase()} o explorar otra categoría.`
               : 'Guardá las referencias que te gusten o buscá una nueva dirección creativa.'}
           </p>
+          {collection === 'visual' && (
+            <button className="text-button" type="button" onClick={() => setCollection('all')}>
+              Ver ideas e informes sin imagen
+            </button>
+          )}
           <button type="button" className="button secondary" disabled={searchBusy} onClick={prepareSearch}>
             <Sparkles size={16} />
             Investigar nuevas referencias
@@ -293,18 +344,59 @@ export function Radar({
         {selected && (
           <div className="trend-detail">
             <div className="reference-gallery">
-              {selected.references.length === 0 && (
+              {(selected.references.length === 0 ||
+                selected.visualStatus === 'context' ||
+                selected.visualStatus === 'unavailable') && (
                 <p className="help-text">
-                  Esta fuente no permitió recuperar una imagen de referencia. Podés consultar la publicación
-                  desde su enlace original.
+                  {selected.visualReason ||
+                    'Esta fuente no permitió recuperar una imagen de referencia. Podés consultar la publicación desde su enlace original.'}
                 </p>
               )}
-              {selected.references.map((reference) => (
-                <figure key={reference.id}>
-                  <ReferenceImage reference={reference} alt={reference.title} />
-                  <figcaption>{reference.title}</figcaption>
-                </figure>
-              ))}
+              {!['context', 'unavailable'].includes(selected.visualStatus || '') &&
+                selected.references.map((reference) => (
+                  <figure
+                    key={reference.id}
+                    className={`reference-choice ${chosenReference === reference.id ? 'is-chosen' : ''}`}
+                  >
+                    <button
+                      className="reference-enlarge"
+                      type="button"
+                      onClick={(event) => {
+                        previewTrigger.current = event.currentTarget;
+                        setPreviewReference(reference);
+                      }}
+                      aria-label={`Ampliar referencia: ${reference.title}`}
+                    >
+                      <ReferenceImage reference={reference} alt={reference.title} />
+                      <span>
+                        <ZoomIn size={17} /> Ampliar
+                      </span>
+                    </button>
+                    <figcaption>{reference.title}</figcaption>
+                    <div className="reference-choice-actions">
+                      <button
+                        className="button secondary small"
+                        type="button"
+                        aria-label={`Elegir referencia: ${reference.title}`}
+                        aria-pressed={chosenReference === reference.id}
+                        onClick={() => setChosenReference(reference.id)}
+                      >
+                        {chosenReference === reference.id ? <Check size={16} /> : <Plus size={16} />}
+                        {chosenReference === reference.id ? 'Imagen elegida' : 'Elegir esta imagen'}
+                      </button>
+                      <a
+                        className="source-link"
+                        href={reference.sourceUrl || selected.sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <SocialSource url={reference.sourceUrl || selected.sourceUrl} />
+                        <ExternalLink size={14} />
+                        <span className="sr-only">Fuente de {reference.title}</span>
+                      </a>
+                    </div>
+                  </figure>
+                ))}
             </div>
             <div className="trend-brief">
               <span className="tag">
@@ -360,13 +452,18 @@ export function Radar({
                 <button
                   className="button"
                   type="button"
+                  disabled={needsReference}
                   onClick={() => {
-                    onUse(selected);
+                    onUse(selected, chosenReference);
                     setDetail(undefined);
                   }}
                 >
                   <Plus size={17} />
-                  Crear con esta idea
+                  {needsReference
+                    ? 'Elegí una imagen para continuar'
+                    : chosenReference
+                      ? 'Crear con esta imagen'
+                      : 'Crear con esta idea'}
                 </button>
                 <button className="button secondary" type="button" onClick={() => onSave(selected)}>
                   <Bookmark size={17} />
@@ -374,6 +471,20 @@ export function Radar({
                 </button>
               </div>
             </div>
+          </div>
+        )}
+      </Modal>
+      <Modal
+        open={!!previewReference}
+        returnFocusTo={previewTrigger.current}
+        onClose={() => setPreviewReference(undefined)}
+        title={previewReference?.title || 'Referencia visual'}
+        description="Imagen original de la fuente. La campaña tendrá sus propios productos y textos."
+        wide
+      >
+        {previewReference && (
+          <div className="reference-original">
+            <ReferenceImage reference={previewReference} alt={previewReference.title} preview={false} />
           </div>
         )}
       </Modal>
@@ -403,7 +514,7 @@ export function Radar({
               onChange={(event) => setNewQuery(event.target.value)}
               rows={4}
               required
-              maxLength={1000}
+              maxLength={500}
             />
           </label>
           <p className="help-text">

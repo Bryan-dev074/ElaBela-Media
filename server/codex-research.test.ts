@@ -29,17 +29,18 @@ afterEach(async () => {
   vi.unstubAllEnvs();
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
 });
-const source = 'https://business.pinterest.com/pinterest-predicts/2026/gimme-gummy/';
-const imageUrl = 'https://images.ctfassets.net/example/Gummy.jpg?fm=webp&q=85';
+const source = 'https://www.pinterest.com/pin/905856912651470473/';
+const reportSource = 'https://business.pinterest.com/pinterest-predicts/2026/gimme-gummy/';
+const imageUrl = 'https://i.pinimg.com/originals/example/Gummy.jpg?fm=webp&q=85';
 const idea = {
   title: 'Brillo con textura',
   summary: 'Referencia de acabado brillante',
   rationale: 'Un carrusel de texturas de maquillaje',
   category: 'Belleza',
   format: 'Carrusel',
-  evidence: 'annual',
+  evidence: 'editorial',
   sourceUrl: source,
-  sourceName: 'Pinterest Predicts',
+  sourceName: 'Pinterest · referencia cosmética de prueba',
   publishedAt: null,
   region: 'Global; validar respuesta local',
   suggestedSlides: 3,
@@ -110,21 +111,83 @@ it('records independently retrieved page evidence and rejects login/challenge pa
     source,
     async () =>
       new Response(
-        `<title>Gimme Gummy | Pinterest Predicts 2026</title><meta property="og:image" content="${imageUrl}">`,
+        `<title>Gloss Dalla: composición de producto</title><meta property="og:image" content="${imageUrl}">`,
       ),
   );
-  expect(preview?.title).toBe('Gimme Gummy | Pinterest Predicts 2026');
+  expect(preview?.title).toBe('Gloss Dalla: composición de producto');
   expect(preview?.imageUrls).toEqual([imageUrl]);
+  expect(preview?.visualStatus).toBe('example');
   expect(
     await sourcePreview(source, async () => new Response('<title>Login • Instagram</title>')),
   ).toBeUndefined();
+});
+
+it('keeps annual report covers as context, even with cosmetics words and an allowed OG CDN', async () => {
+  const page = await sourcePreview(
+    reportSource,
+    async () =>
+      new Response(
+        `<title>Gimme Gummy beauty | Pinterest Predicts 2026</title><meta property="og:image" content="https://images.ctfassets.net/test/FOOTBALL.jpg">`,
+      ),
+  );
+  expect(page?.visualStatus).toBe('context');
+  expect(page?.imageUrls).toEqual([]);
+  expect(page?.visualReason).toContain('informe');
+});
+
+it.each(['FOOTBALL collage and stadium', 'Home decor living room', 'Fashion outfits collection'])(
+  'rejects unrelated individual-pin images: %s',
+  async (title) => {
+    const page = await sourcePreview(
+      source,
+      async () => new Response(`<title>${title}</title><meta property="og:image" content="${imageUrl}">`),
+    );
+    expect(page?.visualStatus).toBe('unavailable');
+    expect(page?.imageUrls).toEqual([]);
+  },
+);
+
+it('does not treat a cosmetics board as an individual visual example', async () => {
+  const page = await sourcePreview(
+    'https://www.pinterest.com/test/cosmetics/',
+    async () =>
+      new Response(
+        `<title>Cosmetics inspiration board</title><meta property="og:image" content="${imageUrl}">`,
+      ),
+  );
+  expect(page?.visualStatus).toBe('context');
+  expect(page?.imageUrls).toEqual([]);
+});
+
+it('uses source metadata in either attribute order to identify the actual cosmetics pin', async () => {
+  const page = await sourcePreview(
+    source,
+    async () =>
+      new Response(
+        `<title>Linha Bem Querer da Dalla</title><meta content="Cosméticos e maquiagem" name="description"><meta content="${imageUrl}" name="og:image">`,
+      ),
+  );
+  expect(page?.visualStatus).toBe('example');
+  expect(page?.imageUrls).toEqual([imageUrl]);
+});
+
+it('rejects a known platform placeholder or unrelated share cover even on a cosmetics pin', async () => {
+  const page = await sourcePreview(
+    source,
+    async () =>
+      new Response(
+        '<title>Gloss cosmetics</title><meta property="og:image" content="https://s.pinimg.com/webapp/logo.png"><meta property="og:image" content="https://i.pinimg.com/FOOTBALL-cover.jpg">',
+      ),
+  );
+  expect(page?.imageUrls).toEqual([]);
+  expect(page?.visualStatus).toBe('unavailable');
 });
 
 it('imports a source independently opened by the service when CLI search events omit result URLs', async () => {
   const { store } = await fixture();
   const verifiedPage = {
     url: source,
-    title: 'Gimme Gummy | Pinterest Predicts 2026',
+    title: 'Gloss Dalla: composición de producto',
     imageUrls: [],
     checkedAt: new Date().toISOString(),
   };
@@ -172,11 +235,16 @@ it('persists button research and original references without an API key, preserv
     openedUrls: [source],
     searches: 2,
   }));
-  const images = vi.fn(async () => [imageUrl]);
+  const verifySource = vi.fn(async () => ({
+    url: source,
+    title: 'Gloss Dalla',
+    imageUrls: [imageUrl],
+    checkedAt: new Date().toISOString(),
+  }));
   const hooks = createCodexResearch({
     available: async () => true,
     runner,
-    images,
+    verifySource,
     downloader: async () => bytes,
   });
   const first = await hooks.searchTrends?.({ query: 'gloss', store });
@@ -186,10 +254,17 @@ it('persists button research and original references without an API key, preserv
   expect(trend?.platform).toBe('Pinterest');
   expect(trend?.productIds).toEqual([]);
   expect(trend?.references[0]?.assetId).toBeTruthy();
+  expect(trend?.references[0]?.sourceUrl).toBe(source);
+  expect(trend?.visualStatus).toBe('example');
   if (!trend?.references[0]?.assetId) throw new Error('Missing reference');
   expect(await readFile(await store.getAssetPath(trend.references[0].assetId))).toEqual(bytes);
   await store.setTrendSaved(trend.id, true);
-  images.mockResolvedValue([]);
+  verifySource.mockResolvedValue({
+    url: source,
+    title: 'Gloss Dalla',
+    imageUrls: [],
+    checkedAt: new Date().toISOString(),
+  });
   await hooks.searchTrends?.({ query: 'gloss otra vez', store });
   await finished(store);
   const saved = (await store.bootstrap()).trends[0];
@@ -207,6 +282,95 @@ it('persists button research and original references without an API key, preserv
       'utf8',
     ),
   ).toContain('codex-local');
+});
+
+it('does not reattach a previous generic cover when an annual favorite is researched again', async () => {
+  const { store } = await fixture();
+  const annual = {
+    ...idea,
+    id: 'saved-annual',
+    evidence: 'annual' as const,
+    sourceUrl: reportSource,
+    platform: 'Pinterest',
+    observedAt: new Date().toISOString(),
+    publishedAt: undefined,
+    saved: true,
+    references: [{ id: 'football', title: 'FOOTBALL cover', url: imageUrl }],
+  };
+  await store.importTrends([annual]);
+  const downloader = vi.fn(async () => Buffer.from('not an image'));
+  const hooks = createCodexResearch({
+    available: async () => true,
+    runner: async () => ({
+      text: JSON.stringify({ trends: [{ ...idea, evidence: 'annual', sourceUrl: reportSource }] }),
+      openedUrls: [reportSource],
+      searches: 1,
+    }),
+    verifySource: async () => ({
+      url: reportSource,
+      title: 'Gimme Gummy beauty | Pinterest Predicts',
+      imageUrls: [imageUrl],
+      checkedAt: new Date().toISOString(),
+    }),
+    downloader,
+  });
+  await hooks.searchTrends?.({ query: 'gloss', store });
+  expect((await finished(store))?.status).toBe('completed');
+  const saved = (await store.bootstrap()).trends.find((trend) => trend.id === annual.id);
+  expect(saved?.saved).toBe(true);
+  expect(saved?.references).toEqual([]);
+  expect(saved?.visualStatus).toBe('context');
+  expect(downloader).not.toHaveBeenCalled();
+});
+
+it('retains an opened cosmetics idea honestly when its image cannot be independently verified', async () => {
+  const { store } = await fixture();
+  const hooks = createCodexResearch({
+    available: async () => true,
+    runner: async () => ({ text: JSON.stringify({ trends: [idea] }), openedUrls: [source], searches: 1 }),
+    verifySource: async () => undefined,
+  });
+  await hooks.searchTrends?.({ query: 'gloss', store });
+  expect((await finished(store))?.status).toBe('completed');
+  const found = (await store.bootstrap()).trends[0];
+  expect(found?.references).toEqual([]);
+  expect(found?.visualStatus).toBe('unavailable');
+  expect(found?.visualReason).toBeTruthy();
+});
+
+it('removes an old association when the actual pin is now verified as unrelated, preserving its favorite', async () => {
+  const { store } = await fixture();
+  await store.importTrends([
+    {
+      ...idea,
+      id: 'old-wrong-pin',
+      publishedAt: undefined,
+      platform: 'Pinterest',
+      evidence: 'editorial',
+      saved: true,
+      observedAt: new Date().toISOString(),
+      references: [{ id: 'old-reference', title: 'Referencia original', url: imageUrl, sourceUrl: source }],
+    },
+  ]);
+  const hooks = createCodexResearch({
+    available: async () => true,
+    runner: async () => ({ text: JSON.stringify({ trends: [idea] }), openedUrls: [source], searches: 1 }),
+    verifySource: () =>
+      sourcePreview(
+        source,
+        async () =>
+          new Response(
+            `<title>Football stadium poster</title><meta property="og:image" content="${imageUrl}">`,
+          ),
+      ),
+    downloader: async () => Buffer.from('not an image'),
+  });
+  await hooks.searchTrends?.({ query: 'gloss', store });
+  expect((await finished(store))?.status).toBe('completed');
+  const result = (await store.bootstrap()).trends[0];
+  expect(result?.saved).toBe(true);
+  expect(result?.references).toEqual([]);
+  expect(result?.visualStatus).toBe('unavailable');
 });
 
 it('rejects unobserved source URLs and duplicate active requests without retrying the runner', async () => {

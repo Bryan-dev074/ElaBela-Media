@@ -25,6 +25,7 @@ import { useRef, useState } from 'react';
 import { addToFinal, moveFinal, replaceFinal } from '../../shared/composition';
 import type { Asset, Bootstrap, Campaign, CopyOption, Job, ServiceStatus, Trend } from '../../shared/types';
 import { post, request } from '../api';
+import { CodexRequestPanel } from './CodexRequestPanel';
 import { AssetImage, AssetViewer, Modal, ReferenceImage } from './ui';
 
 type Step = 'copy' | 'variants' | 'review';
@@ -90,6 +91,8 @@ export default function Studio({
   const [viewer, setViewer] = useState<Asset>();
   const [replace, setReplace] = useState<string>();
   const [publishOpen, setPublishOpen] = useState(false);
+  const [codexRequestOpen, setCodexRequestOpen] = useState(false);
+  const codexRequestTrigger = useRef<HTMLElement | null>(null);
   const [confirmedRevision, setConfirmedRevision] = useState<number | null>(null);
   const [draft, setDraft] = useState<CopyDraft | undefined>(() => readDraft(campaign));
   const [savingCopy, setSavingCopy] = useState(false);
@@ -100,6 +103,13 @@ export default function Studio({
   const trend = trends.find((item) => item.id === campaign.trendId);
   const selectedCopy = campaign.copyOptions.find((copy) => copy.id === campaign.selectedCopyId);
   const generatedCount = campaign.variants.flatMap((variant) => variant.assetIds).filter(Boolean).length;
+  const codexChat = status.generationProvider === 'codex-chat';
+  const codexRequest = campaign.codexRequest;
+  const pendingCodexRequest =
+    codexRequest && ['ready', 'partial'].includes(codexRequest.status) ? codexRequest : undefined;
+  const missingImages = campaign.variants.some((variant) => variant.assetIds.some((id) => !id));
+  const reopenCodexRequest =
+    !!pendingCodexRequest || (codexRequest?.status === 'completed' && !missingImages);
   const activeJob = jobs.find(
     (job) => job.campaignId === campaign.id && ['queued', 'running'].includes(job.status),
   );
@@ -109,6 +119,7 @@ export default function Studio({
     savingCopy ||
     !!activeJob ||
     ['publishing', 'unknown', 'partial', 'verified'].includes(campaign.publication?.status || '');
+  const publicationLocked = locked || !!pendingCodexRequest;
   function changeDraft(next: CopyDraft | undefined) {
     currentDraft.current = next;
     setDraft(next);
@@ -199,18 +210,32 @@ export default function Studio({
     }
   }
   function generate(variantId?: string, slot?: number) {
+    if (locked) return;
+    if (codexChat && pendingCodexRequest) {
+      openCodexRequest();
+      return;
+    }
     if (draft) {
       onError('Guardá o descartá el borrador de textos antes de generar.');
       return;
     }
+    if (codexChat && document.activeElement instanceof HTMLElement) {
+      codexRequestTrigger.current = document.activeElement;
+    }
     void perform(async () => {
       const result = await post<{ campaign: Campaign }>(`/api/campaigns/${campaign.id}/generate`, {
+        revision: campaign.revision,
         variantId,
         slot,
       });
       setStep('variants');
+      if (codexChat) setCodexRequestOpen(true);
       return result.campaign;
     });
+  }
+  function openCodexRequest() {
+    if (document.activeElement instanceof HTMLElement) codexRequestTrigger.current = document.activeElement;
+    setCodexRequestOpen(true);
   }
   function openAsset(id: string) {
     setViewer(assets.find((asset) => asset.id === id));
@@ -347,29 +372,45 @@ export default function Studio({
         </div>
       )}
       {step === 'copy' && (
-        <CopyEditor
-          key={campaign.id}
-          campaign={campaign}
-          hasImages={generatedCount > 0}
-          locked={locked}
-          saving={savingCopy}
-          draft={draft}
-          onDraftChange={changeDraft}
-          onSave={saveCopy}
-          onOptions={() =>
-            void perform(async () => {
-              const result = await post<{ campaign: Campaign }>(`/api/campaigns/${campaign.id}/copy`);
-              return result.campaign;
-            })
-          }
-          onError={onError}
-        />
+        <>
+          {pendingCodexRequest && (
+            <div className="inline-notice">
+              <span>
+                El pedido de Codex conserva los textos de las imágenes. Para cambiarlos, cancelá el pedido;
+                podés seguir editando la descripción del post.
+              </span>
+              <button className="text-button" type="button" onClick={openCodexRequest}>
+                Ver pedido de Codex
+              </button>
+            </div>
+          )}
+          <CopyEditor
+            key={campaign.id}
+            campaign={campaign}
+            hasImages={generatedCount > 0 || !!pendingCodexRequest}
+            locked={locked}
+            saving={savingCopy}
+            draft={draft}
+            onDraftChange={changeDraft}
+            onSave={saveCopy}
+            onOptions={() =>
+              void perform(async () => {
+                const result = await post<{ campaign: Campaign }>(`/api/campaigns/${campaign.id}/copy`);
+                return result.campaign;
+              })
+            }
+            onError={onError}
+          />
+        </>
       )}
       {step === 'variants' && (
         <>
           <div className="studio-context">
             <div className="context-reference">
-              <ReferenceImage reference={trend?.references[0]} alt="Referencia de la campaña" />
+              <ReferenceImage
+                reference={trend?.references.find((reference) => reference.id === campaign.referenceId)}
+                alt="Referencia de la campaña"
+              />
             </div>
             <div>
               <span className="eyebrow">La dirección creativa</span>
@@ -388,17 +429,50 @@ export default function Studio({
               <h2>Tres formas de contar tu idea.</h2>
               <p>Elegí una propuesta completa o llevá tus piezas favoritas al carrusel final.</p>
             </div>
-            <button
-              type="button"
-              className="button"
-              disabled={locked || !status.generationConfigured || generatedCount > 0}
-              onClick={() => generate()}
-            >
-              <WandSparkles size={17} />
-              Generar {campaign.variantCount} propuestas
-            </button>
+            <div className="codex-request-actions">
+              {codexChat && codexRequest && !reopenCodexRequest && (
+                <button className="text-button" type="button" onClick={openCodexRequest}>
+                  Ver último pedido de Codex
+                </button>
+              )}
+              <button
+                type="button"
+                className="button"
+                disabled={
+                  locked ||
+                  (!codexChat && (!status.generationConfigured || generatedCount > 0)) ||
+                  (codexChat && !missingImages && !reopenCodexRequest)
+                }
+                onClick={() => (codexChat && reopenCodexRequest ? openCodexRequest() : generate())}
+              >
+                <WandSparkles size={17} />
+                {codexChat
+                  ? reopenCodexRequest
+                    ? 'Ver pedido de Codex'
+                    : generatedCount > 0
+                      ? 'Preparar piezas pendientes en Codex'
+                      : `Preparar ${campaign.variantCount} propuestas en Codex`
+                  : `Generar ${campaign.variantCount} propuestas`}
+              </button>
+            </div>
           </div>
-          {!status.generationConfigured && (
+          {codexChat && (
+            <div className="inline-notice codex-request-notice">
+              <div>
+                <strong>
+                  {pendingCodexRequest
+                    ? 'Pendiente de generar en el chat'
+                    : 'Imágenes desde el chat de Codex'}
+                </strong>
+                <p>
+                  {pendingCodexRequest
+                    ? `${pendingCodexRequest.completed} de ${pendingCodexRequest.total} imágenes importadas. Podés seguir combinando las piezas disponibles.`
+                    : 'Prepará el pedido, pegá la instrucción en este chat y revisá las imágenes cuando se importen.'}
+                </p>
+              </div>
+            </div>
+          )}
+          {!codexChat && !status.generationConfigured && (
             <div className="inline-notice">
               <Sparkles size={18} />
               <span>
@@ -480,9 +554,13 @@ export default function Studio({
                             <button
                               type="button"
                               className="icon-button"
-                              disabled={locked || !status.generationConfigured}
+                              disabled={locked || (!codexChat && !status.generationConfigured)}
                               onClick={() => generate(variant.id, slot)}
-                              aria-label={`Regenerar ${variant.label}, pieza ${slot + 1}`}
+                              aria-label={
+                                codexChat
+                                  ? `Preparar reemplazo en Codex para ${variant.label}, pieza ${slot + 1}`
+                                  : `Regenerar ${variant.label}, pieza ${slot + 1}`
+                              }
                             >
                               <RefreshCw size={16} />
                             </button>
@@ -519,11 +597,11 @@ export default function Studio({
                           <button
                             className="text-button generate-one"
                             type="button"
-                            disabled={locked || !status.generationConfigured}
+                            disabled={locked || (!codexChat && !status.generationConfigured)}
                             onClick={() => generate(variant.id, slot)}
                           >
                             <Sparkles size={13} />
-                            Generar esta pieza
+                            {codexChat ? 'Preparar esta pieza en Codex' : 'Generar esta pieza'}
                           </button>
                         </>
                       )}
@@ -546,11 +624,17 @@ export default function Studio({
                 const target = importTarget;
                 void perform(async () => {
                   const form = new FormData();
+                  const requestedTarget = pendingCodexRequest?.targets.find(
+                    (item) =>
+                      item.variantId === target.variantId && item.slot === target.slot && !item.assetId,
+                  );
+                  if (requestedTarget && pendingCodexRequest)
+                    form.append('requestId', pendingCodexRequest.id);
                   form.append('variantId', target.variantId);
                   form.append('slot', String(target.slot));
                   form.append('file', file);
                   const result = await request<{ campaign: Campaign }>(
-                    `/api/campaigns/${campaign.id}/assets`,
+                    `/api/campaigns/${campaign.id}/${requestedTarget ? 'codex-assets' : 'assets'}`,
                     { method: 'POST', body: form },
                   );
                   return result.campaign;
@@ -715,7 +799,7 @@ export default function Studio({
               type="button"
               className="button"
               disabled={
-                locked ||
+                publicationLocked ||
                 !!draft ||
                 campaign.finalAssetIds.length !== campaign.slideCount ||
                 !status.metaConfigured
@@ -728,11 +812,44 @@ export default function Studio({
               <Send size={16} />
               Revisar y publicar
             </button>
+            {pendingCodexRequest && (
+              <>
+                <p className="help-text">Completá o cancelá el pedido de Codex antes de publicar.</p>
+                <button className="text-button" type="button" onClick={openCodexRequest}>
+                  Ver pedido de Codex
+                </button>
+              </>
+            )}
             {!status.metaConfigured && <p className="help-text">Primero conectá MetaBusiness en esta PC.</p>}
           </section>
         </div>
       )}
       <AssetViewer asset={viewer} onClose={() => setViewer(undefined)} />
+      {codexRequest && (
+        <CodexRequestPanel
+          key={codexRequest.id}
+          open={codexRequestOpen}
+          campaign={campaign}
+          request={codexRequest}
+          busy={locked}
+          returnFocusTo={codexRequestTrigger.current}
+          onClose={() => setCodexRequestOpen(false)}
+          onCancel={() => {
+            if (locked) return;
+            void perform(
+              async () =>
+                (
+                  await request<{ campaign: Campaign }>(`/api/campaigns/${campaign.id}/codex-request`, {
+                    method: 'DELETE',
+                    body: JSON.stringify({ requestId: codexRequest.id }),
+                  })
+                ).campaign,
+            );
+          }}
+          onRefresh={onRefresh}
+          onError={onError}
+        />
+      )}
       <Modal
         open={!!replace}
         onClose={() => setReplace(undefined)}
@@ -785,7 +902,7 @@ export default function Studio({
         <label className="check-field">
           <input
             type="checkbox"
-            disabled={!!draft}
+            disabled={!!draft || !!pendingCodexRequest}
             checked={!draft && confirmedRevision === campaign.revision}
             onChange={(event) => setConfirmedRevision(event.target.checked ? campaign.revision : null)}
           />
@@ -808,9 +925,9 @@ export default function Studio({
           <button
             type="button"
             className="button"
-            disabled={!!draft || confirmedRevision !== campaign.revision || locked}
+            disabled={!!draft || confirmedRevision !== campaign.revision || publicationLocked}
             onClick={() => {
-              if (draft || confirmedRevision !== campaign.revision || locked) return;
+              if (draft || confirmedRevision !== campaign.revision || publicationLocked) return;
               const revision = confirmedRevision;
               void perform(async () => {
                 const approved = await post<Campaign>(`/api/campaigns/${campaign.id}/approve`, {

@@ -311,7 +311,7 @@ describe('catalogue, search evidence and reference cache', () => {
 
   it('keeps only reference URLs evidenced by web_search_call results and preserves favorites on repeat', async () => {
     const { store } = await fixture();
-    const sourceUrl = 'https://business.pinterest.com/pinterest-predicts/';
+    const sourceUrl = 'https://www.pinterest.com/pin/905856912651470473/';
     const evidencedUrl = 'https://i.pinimg.com/reference.webp';
     const inventedUrl = 'https://s.pinimg.com/invented.webp';
     let searchCount = 0;
@@ -326,7 +326,7 @@ describe('catalogue, search evidence and reference cache', () => {
               category: 'Gloss',
               format: 'Carrusel',
               platform: 'Pinterest',
-              evidence: 'annual',
+              evidence: 'editorial',
               sourceUrl,
               sourceName: 'Pinterest Business',
               publishedAt: null,
@@ -353,7 +353,7 @@ describe('catalogue, search evidence and reference cache', () => {
                 type: 'image_result',
                 image_url: evidencedUrl,
                 source_website_url: sourceUrl,
-                title: 'Imagen encontrada',
+                title: 'Gloss ciruela: maquillaje de labios',
               },
             ],
           },
@@ -415,6 +415,7 @@ describe('catalogue, search evidence and reference cache', () => {
     const copies: Trend[] = [0, 1].map((index) => ({
       ...trend,
       id: `cache-${index}`,
+      sourceUrl: 'https://www.pinterest.com/pin/905856912651470473/',
       title: `Cache ${index}`,
       references: [
         { id: `shared-${index}`, url: sharedUrl, title: 'Compartida' },

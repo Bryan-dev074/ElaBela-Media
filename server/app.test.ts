@@ -308,7 +308,7 @@ describe('servicio local', () => {
       method: 'POST',
       url: `/api/campaigns/${campaign.id}/generate`,
       headers: authHeaders({ 'content-type': 'application/json' }),
-      payload: {},
+      payload: { revision: campaign.revision },
     });
     expect(generation.statusCode).toBe(200);
 
@@ -457,7 +457,7 @@ describe('servicio local', () => {
       method: 'POST',
       url: `/api/campaigns/${campaign.id}/generate`,
       headers: authHeaders({ 'content-type': 'application/json' }),
-      payload: {},
+      payload: { revision: campaign.revision },
     });
     expect(generation.statusCode).toBe(200);
     stream.end(

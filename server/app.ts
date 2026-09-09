@@ -3,8 +3,9 @@ import multipart from '@fastify/multipart';
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import type { Campaign, Trend } from '../shared/types.js';
+import { importCodexAsset } from './codex-generation.js';
 import type { Integrations } from './contracts.js';
-import { ServiceError } from './contracts.js';
+import { pendingCodexRequest, ServiceError } from './contracts.js';
 import { recoverInterruptedJobs } from './jobs.js';
 import { removeStoredImage, type StoredImage, storeCampaignImage } from './media.js';
 import { cacheTrendReferences } from './providers.js';
@@ -17,6 +18,7 @@ export interface BuildAppOptions {
   allowedOrigins?: string[];
   integrations?: Integrations;
   researchStatus?: { researchProvider: 'codex' | 'api'; researchReady: boolean };
+  generationStatus?: { generationProvider: 'codex-chat' | 'api'; generationConfigured: boolean };
   recoverJobs?: boolean;
   notFoundHandler?: (request: FastifyRequest, reply: FastifyReply) => Promise<unknown>;
 }
@@ -27,6 +29,7 @@ export type LocalApp = FastifyInstance & {
 const createCampaignSchema = z.object({
   title: z.string().trim().min(1).max(160),
   trendId: z.string().trim().min(1).max(120),
+  referenceId: z.string().min(1).max(120).optional(),
   productIds: z.array(z.string().min(1).max(120)).max(100),
   language: z.enum(['es', 'pt']),
   slideCount: z.number().int().min(1).max(20),
@@ -38,6 +41,7 @@ const referenceSchema = z.object({
   url: z.string().url().max(2_000).refine(isHttpsUrl, 'La referencia debe usar HTTPS'),
   title: z.string().trim().min(1).max(300),
   assetId: z.string().max(120).optional(),
+  sourceUrl: z.string().url().max(2_000).refine(isHttpsUrl, 'La fuente debe usar HTTPS').optional(),
 });
 
 const trendSchema = z.object({
@@ -64,6 +68,8 @@ const trendSchema = z.object({
   productIds: z.array(z.string().min(1).max(120)).max(100),
   suggestedSlides: z.number().int().min(1).max(20),
   references: z.array(referenceSchema).max(30),
+  visualStatus: z.enum(['example', 'context', 'unavailable']).optional(),
+  visualReason: z.string().max(2_000).optional(),
   saved: z.boolean(),
   palette: z.array(z.string().max(80)).max(20),
   keywords: z.array(z.string().max(100)).max(50),
@@ -94,6 +100,7 @@ const campaignSchema = z.object({
   id: z.string().min(1).max(120),
   title: z.string().trim().min(1).max(160),
   trendId: z.string().max(120),
+  referenceId: z.string().min(1).max(120).optional(),
   productIds: z.array(z.string().min(1).max(120)).max(100),
   language: z.enum(['es', 'pt']),
   slideCount: z.number().int().min(1).max(20),
@@ -200,7 +207,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<LocalApp>
   app.options('/api/*', async (request, reply) => {
     if (!request.headers.origin) throw new ServiceError('Origen no autorizado', 403);
     return reply
-      .header('access-control-allow-methods', 'GET,POST,PUT,PATCH,OPTIONS')
+      .header('access-control-allow-methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
       .header('access-control-allow-headers', 'authorization,content-type')
       .header('access-control-max-age', '600')
       .status(204)
@@ -209,7 +216,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<LocalApp>
 
   app.get('/api/bootstrap', async () => {
     const data = await store.bootstrap();
-    return { ...data, status: { ...data.status, ...options.researchStatus } };
+    return { ...data, status: { ...data.status, ...options.researchStatus, ...options.generationStatus } };
   });
   app.post('/api/shutdown', async (_request, reply) => {
     const result = await app.beginShutdown();
@@ -254,6 +261,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<LocalApp>
     const { id } = z.object({ id: z.string().min(1).max(120) }).parse(request.params);
     const submitted = campaignSchema.parse(request.body) as Campaign;
     const current = store.getCampaign(id);
+    submitted.referenceId ??= current.referenceId;
     store.assertCampaignEditable(id);
     assertFrozenCreativeInputs(current, submitted);
     const campaign: Campaign = {
@@ -261,6 +269,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<LocalApp>
       variants: resizeVariants(current, submitted.slideCount),
       variantCount: current.variantCount,
       publication: current.publication,
+      codexRequest: current.codexRequest,
     };
     if (id !== campaign.id) throw new ServiceError('El ID de campaña no coincide', 400);
     validateCampaignShape(campaign);
@@ -315,6 +324,38 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<LocalApp>
     }
   });
 
+  app.delete('/api/campaigns/:id/codex-request', async (request) => {
+    const { id } = z.object({ id: z.string().min(1).max(120) }).parse(request.params);
+    const { requestId } = z.object({ requestId: z.string().min(1).max(120) }).parse(request.body);
+    return { campaign: await store.cancelCodexRequest(id, requestId) };
+  });
+
+  app.post('/api/campaigns/:id/codex-assets', async (request, reply) => {
+    const { id: campaignId } = z.object({ id: z.string().min(1).max(120) }).parse(request.params);
+    let image: Buffer | undefined;
+    const fields: Record<string, string> = {};
+    for await (const part of request.parts()) {
+      if (part.type === 'file') {
+        if (part.fieldname !== 'file' || image) throw new ServiceError('Se admite una sola imagen', 400);
+        image = await part.toBuffer();
+      } else if (typeof part.value === 'string') {
+        if (fields[part.fieldname] !== undefined) throw new ServiceError('Campo repetido', 400);
+        fields[part.fieldname] = part.value;
+      }
+    }
+    if (!image) throw new ServiceError('Falta la imagen', 400);
+    const placement = z
+      .object({
+        requestId: z.string().min(1).max(120),
+        variantId: z.string().min(1).max(120),
+        slot: z.coerce.number().int().min(0),
+      })
+      .strict()
+      .parse(fields);
+    const result = await importCodexAsset({ store, campaignId, ...placement, buffer: image });
+    return reply.status(201).send(result);
+  });
+
   app.get('/api/assets/:id', async (request, reply) => {
     const { id } = z.object({ id: z.string().min(1).max(120) }).parse(request.params);
     const query = z.object({ download: z.enum(['1']).optional() }).parse(request.query);
@@ -348,8 +389,13 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<LocalApp>
     const campaign = campaignFromRequest(store, request);
     if (!options.integrations?.generate) throw new ServiceError('Proveedor de imágenes no configurado', 503);
     const payload = z
-      .object({ variantId: z.string().min(1).max(120).optional(), slot: z.number().int().min(0).optional() })
+      .object({
+        revision: z.number().int().nonnegative(),
+        variantId: z.string().min(1).max(120).optional(),
+        slot: z.number().int().min(0).optional(),
+      })
       .parse(request.body ?? {});
+    if (payload.revision !== campaign.revision) throw new ServiceError('Conflicto de revisión', 409);
     return options.integrations.generate({ campaign, payload, store });
   });
 
@@ -465,10 +511,13 @@ function resizeVariants(current: Campaign, slideCount: number): Campaign['varian
 }
 
 function assertFrozenCreativeInputs(current: Campaign, submitted: Campaign): void {
-  const hasImages = current.variants.some((variant) => variant.assetIds.some(Boolean));
+  const hasImages =
+    current.variants.some((variant) => variant.assetIds.some(Boolean)) ||
+    pendingCodexRequest(current.codexRequest);
   if (!hasImages) return;
   const changed =
     current.trendId !== submitted.trendId ||
+    current.referenceId !== submitted.referenceId ||
     current.selectedCopyId !== submitted.selectedCopyId ||
     current.language !== submitted.language ||
     current.slideCount !== submitted.slideCount ||

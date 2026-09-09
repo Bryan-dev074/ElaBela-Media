@@ -94,6 +94,10 @@ La búsqueda inicial admite resultados filtrados/paginados sin una tabla analít
 
 ## Criterios permanentes
 
+### Referencias visuales y pedido del chat — revisión 2026-09-09
+
+Se reutilizan CSS columns para la galería con imágenes completas, botones nativos para selección, Radix Dialog para ampliar referencias y el uploader existente para originales. Compatible con React/Vite/CSS actual; sin nuevo motor, licencia adicional ni dependencia. Se descartan paquetes de masonry, lightbox y drag-and-drop adicionales porque no resuelven una necesidad pendiente. Foco, teclado, errores de carga, móvil y bundle se comprueban con las herramientas adoptadas. El importador usa Node/Fetch y Sharp existentes; no incorpora un SDK de imágenes de pago.
+
 ### Tipografía adoptada — 2026-09-09
 
 DM Sans variable para controles y Manrope variable para titulares. Fuente: repositorio oficial google/fonts y CSS de Google Fonts. Ambas SIL OFL 1.1, revisada en `ofl/dmsans/OFL.txt` y `ofl/manrope/OFL.txt`; permite este empaquetado con los avisos conservados. Archivos WOFF2 Latin autoalojados en `public/fonts/`, sin petición externa para tipografía. No requieren biblioteca JS, soportan ES/PT-BR; fallback Segoe UI. Peso descargado total: 61.768 bytes. Se descarta cargar Google Fonts remoto por privacidad, offline y estabilidad visual.

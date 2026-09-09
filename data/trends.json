@@ -1,223 +1,271 @@
 [
   {
-    "id": "gimme-gummy",
-    "title": "Brillo que se siente",
-    "summary": "Gloss, color y una estética de texturas jugosas.",
-    "rationale": "Una portada macro y producto protagonista permiten crear un carrusel sensorial sin prometer resultados irreales.",
-    "category": "Labios",
-    "format": "Carrusel",
-    "platform": "Pinterest",
-    "evidence": "annual",
-    "sourceUrl": "https://newsroom.pinterest.com/en-gb/news/pinterest-predicts-nonconformity-self-preservation-and-escapism-drive-21-trends-for-2026/",
-    "sourceName": "Pinterest Predicts 2026",
-    "observedAt": "2026-09-09T12:00:00Z",
-    "region": "Global; demanda en Paraguay no verificada",
-    "productIds": [
-      "13451",
-      "13147",
-      "13154"
-    ],
-    "suggestedSlides": 3,
-    "references": [
-      {
-        "id": "ref-gimme-gummy",
-        "url": "https://images.ctfassets.net/2pyx8rwuvz6x/6f83n3q1bB7R32NKjMcuc6/d18fccc8f07f3f349a5f3cdf810b6ae2/1TXTGimmeGummy.jpg?fm=webp&q=85&w=2880&h=2880",
-        "title": "Gimme Gummy — referencia original de Pinterest"
-      }
-    ],
-    "saved": false,
-    "palette": [
-      "#e5aebd",
-      "#ab3d6d"
-    ],
-    "keywords": [
-      "gimme-gummy",
-      "Labios",
-      "beauty"
-    ]
-  },
-  {
-    "id": "extra-celestial",
-    "title": "Un toque de otro mundo",
-    "summary": "Reflejos, destellos y una dirección visual celestial.",
-    "rationale": "Combinar detalles de textura con envases reales para una campaña de brillo. Verificar zona de aplicación del producto antes de escribir tutoriales.",
-    "category": "Maquillaje",
-    "format": "Carrusel",
-    "platform": "Pinterest",
-    "evidence": "annual",
-    "sourceUrl": "https://newsroom.pinterest.com/en-gb/news/pinterest-predicts-nonconformity-self-preservation-and-escapism-drive-21-trends-for-2026/",
-    "sourceName": "Pinterest Predicts 2026",
-    "observedAt": "2026-09-09T12:00:00Z",
-    "region": "Global; demanda en Paraguay no verificada",
-    "productIds": [
-      "13321",
-      "13543",
-      "16766"
-    ],
-    "suggestedSlides": 3,
-    "references": [
-      {
-        "id": "ref-extra-celestial",
-        "url": "https://images.ctfassets.net/2pyx8rwuvz6x/64eDqNlbGFln5GLcsaziCr/a2f69586d800c647ef2efab349fa1069/ExtraCelestial-min.jpg?fm=webp&q=85&w=1440&h=1440",
-        "title": "Extra Celestial — referencia original de Pinterest"
-      }
-    ],
-    "saved": false,
-    "palette": [
-      "#9b94bd",
-      "#d8cfec"
-    ],
-    "keywords": [
-      "extra-celestial",
-      "Maquillaje",
-      "beauty"
-    ]
-  },
-  {
-    "id": "glitchy-glam",
-    "title": "Que no combine. Que funcione.",
-    "summary": "Color, asimetría y combinaciones inesperadas.",
-    "rationale": "Un carrusel de elecciones A/B permite comparar looks y cerrar con una pregunta. Es una adaptación editorial; el resultado comercial no está medido.",
-    "category": "Maquillaje",
-    "format": "Carrusel",
-    "platform": "Pinterest",
-    "evidence": "annual",
-    "sourceUrl": "https://newsroom.pinterest.com/en-gb/news/pinterest-predicts-nonconformity-self-preservation-and-escapism-drive-21-trends-for-2026/",
-    "sourceName": "Pinterest Predicts 2026",
-    "observedAt": "2026-09-09T12:00:00Z",
-    "region": "Global; demanda en Paraguay no verificada",
-    "productIds": [
-      "11365",
-      "13475",
-      "4701"
-    ],
-    "suggestedSlides": 3,
-    "references": [
-      {
-        "id": "ref-glitchy-glam",
-        "url": "https://images.ctfassets.net/2pyx8rwuvz6x/Ly07ATa71pDJSKB973Bif/82dea183e64805efddd9da46250b1465/GlitchyGlam.jpg?fm=webp&q=85&w=2880&h=2880",
-        "title": "Glitchy Glam — referencia original de Pinterest"
-      }
-    ],
-    "saved": false,
-    "palette": [
-      "#85a66b",
-      "#dba8b8"
-    ],
-    "keywords": [
-      "glitchy-glam",
-      "Maquillaje",
-      "beauty"
-    ]
-  },
-  {
-    "id": "cool-blue",
-    "title": "La belleza en azul",
-    "summary": "Una dirección de color frío para explorar en uñas y accesorios.",
-    "rationale": "Crear una selección de tonos azules con fotos fieles. Waterloo Blue es candidato por nombre; comprobar tono real antes del diseño.",
-    "category": "Uñas",
-    "format": "Carrusel",
-    "platform": "Pinterest",
-    "evidence": "annual",
-    "sourceUrl": "https://business.pinterest.com/pinterest-palette/",
-    "sourceName": "Pinterest Palette 2026",
-    "observedAt": "2026-09-09T12:00:00Z",
-    "region": "Global; demanda en Paraguay no verificada",
-    "productIds": [
-      "4701",
-      "8402"
-    ],
-    "suggestedSlides": 3,
-    "references": [
-      {
-        "id": "ref-cool-blue",
-        "url": "https://images.ctfassets.net/h67z7i6sbjau/1QLdmTMqtmQKJZaIkqXIGc/b6ce6c541668f543e9c138f099cc0b97/cool_blue_grid.png?fm=webp&q=85&w=2880&h=2880",
-        "title": "Cool Blue — tablero de color de Pinterest"
-      }
-    ],
-    "saved": false,
-    "palette": [
-      "#a9cbd9",
-      "#34658c"
-    ],
-    "keywords": [
-      "cool-blue",
-      "Uñas",
-      "beauty"
-    ]
-  },
-  {
-    "id": "plum-noir",
-    "title": "Después de las seis",
-    "summary": "Ciruelas oscuros, detalles profundos y una campaña para la noche.",
-    "rationale": "Unique Burgundy y un delineado borgoña permiten construir una selección por color. No inferir duración del acabado por el nombre del producto.",
-    "category": "Labios",
-    "format": "Carrusel",
-    "platform": "Pinterest",
-    "evidence": "annual",
-    "sourceUrl": "https://business.pinterest.com/pinterest-palette/",
-    "sourceName": "Pinterest Palette 2026",
-    "observedAt": "2026-09-09T12:00:00Z",
-    "region": "Global; demanda en Paraguay no verificada",
-    "productIds": [
-      "1045",
-      "1137"
-    ],
-    "suggestedSlides": 3,
-    "references": [
-      {
-        "id": "ref-plum-noir",
-        "url": "https://images.ctfassets.net/h67z7i6sbjau/5PkVjX15ZJVCXUPrDgI0UN/f98f349c632aa5a18fb506bc459f0883/Plum_Noir_grid.png?fm=webp&q=85&w=2880&h=2880",
-        "title": "Plum Noir — tablero de color de Pinterest"
-      }
-    ],
-    "saved": false,
-    "palette": [
-      "#57323e",
-      "#ab818d"
-    ],
-    "keywords": [
-      "plum-noir",
-      "Labios",
-      "beauty"
-    ]
-  },
-  {
-    "id": "winning-glam",
-    "title": "Brillo para salir a jugar",
-    "summary": "Maquillaje expresivo, difuminado y guiños deportivos.",
-    "rationale": "Convertir la energía de la referencia en una campaña de fin de semana. Informe de mayo: revisar vigencia local antes de producir; no anunciar resistencia al sudor sin evidencia.",
+    "id": "visual-dalla-tonos",
+    "title": "Tonos que se eligen con los ojos",
+    "summary": "Polvos compactos abiertos, repetición y fondo rosa: una composición para comparar tonos.",
+    "rationale": "Adaptar la repetición con los compactos CoverGirl del catálogo y sus tonos reales. La marca Dalla de la referencia no se ofrece como producto de ElaBela.",
     "category": "Maquillaje",
     "format": "Carrusel",
     "platform": "Pinterest",
     "evidence": "editorial",
-    "sourceUrl": "https://newsroom.pinterest.com/en-SG/news/summer-trend-report-2026/",
-    "sourceName": "Pinterest Summer Report",
-    "observedAt": "2026-09-09T12:00:00Z",
-    "publishedAt": "2026-05-26",
-    "region": "Global; demanda en Paraguay no verificada",
+    "sourceUrl": "https://br.pinterest.com/pin/76279787431903950/",
+    "sourceName": "Pin de referencia visual",
+    "observedAt": "2026-09-09T16:13:18.427Z",
+    "region": "Inspiración visual; fecha y viralidad no verificadas",
     "productIds": [
-      "13321",
-      "1458",
-      "1137"
+      "6033",
+      "8297"
     ],
     "suggestedSlides": 3,
     "references": [
       {
-        "id": "ref-winning-glam",
-        "url": "https://images.ctfassets.net/2pyx8rwuvz6x/7D0O8j9tdmQQ68WfdFTZHB/8c05863109daa22a5300fa229fa4235a/PepRally_Glam.jpeg?fm=webp&q=85&w=1680&h=1680",
-        "title": "Pep-Rally Glam — referencia original de Pinterest"
+        "id": "ref-dalla-tonos",
+        "url": "https://i.pinimg.com/736x/01/bf/04/01bf04547d233276ae715e50bfa236d4.jpg",
+        "sourceUrl": "https://br.pinterest.com/pin/76279787431903950/",
+        "title": "Tonos que se eligen con los ojos"
       }
     ],
+    "visualStatus": "example",
     "saved": false,
     "palette": [
-      "#598ec5",
-      "#d5e4f0"
+      "#e8b6c3",
+      "#a4765d"
     ],
     "keywords": [
-      "winning-glam",
       "Maquillaje",
-      "beauty"
+      "cosméticos",
+      "diseño de producto"
     ]
+  },
+  {
+    "id": "visual-elaluz-oil",
+    "title": "El ritual, visto desde arriba",
+    "summary": "Aceite de belleza y una selección de básicos fotografiados sobre texturas suaves.",
+    "rationale": "Elaluz Beauty Oil está en el catálogo. Proponer portada con el frasco real, detalle del producto y cierre con el ritual elegido; revisar indicaciones antes del texto.",
+    "category": "Skincare",
+    "format": "Carrusel",
+    "platform": "Pinterest",
+    "evidence": "editorial",
+    "sourceUrl": "https://www.pinterest.com/pin/444237950753057100/",
+    "sourceName": "Pin de referencia visual",
+    "observedAt": "2026-09-09T16:13:20.679Z",
+    "region": "Inspiración visual; fecha y viralidad no verificadas",
+    "productIds": [
+      "9065"
+    ],
+    "suggestedSlides": 3,
+    "references": [
+      {
+        "id": "ref-elaluz-oil",
+        "url": "https://i.pinimg.com/736x/33/53/8c/33538c6fddf832f4a3ca0d27af068efc.jpg",
+        "sourceUrl": "https://www.pinterest.com/pin/444237950753057100/",
+        "title": "El ritual, visto desde arriba"
+      }
+    ],
+    "visualStatus": "example",
+    "saved": false,
+    "palette": [
+      "#c9b398",
+      "#f0e4d9"
+    ],
+    "keywords": [
+      "Skincare",
+      "cosméticos",
+      "diseño de producto"
+    ]
+  },
+  {
+    "id": "visual-maybelline-tutorial",
+    "title": "Gloss en primer plano",
+    "summary": "Un acercamiento del aplicador y el brillo como base para un tutorial de tres imágenes.",
+    "rationale": "Los Maybelline Lifter Gloss figuran en ElaBela. Crear una secuencia propia: producto, aplicación y acabado; respetar el tono y las instrucciones reales.",
+    "category": "Labios",
+    "format": "Carrusel",
+    "platform": "Pinterest",
+    "evidence": "editorial",
+    "sourceUrl": "https://www.pinterest.com/pin/1002613935795392169/",
+    "sourceName": "Pin de referencia visual",
+    "observedAt": "2026-09-09T16:13:21.566Z",
+    "region": "Inspiración visual; fecha y viralidad no verificadas",
+    "productIds": [
+      "550",
+      "1595",
+      "1601"
+    ],
+    "suggestedSlides": 3,
+    "references": [
+      {
+        "id": "ref-maybelline-tutorial",
+        "url": "https://i.pinimg.com/736x/f5/3b/86/f53b867e1f2b80a646965e657ce04de2.jpg",
+        "sourceUrl": "https://www.pinterest.com/pin/1002613935795392169/",
+        "title": "Gloss en primer plano"
+      }
+    ],
+    "visualStatus": "example",
+    "saved": false,
+    "palette": [
+      "#bf7a73",
+      "#f4cdc5"
+    ],
+    "keywords": [
+      "Labios",
+      "cosméticos",
+      "diseño de producto",
+      "tutorial"
+    ]
+  },
+  {
+    "id": "visual-vitamin-c-ad",
+    "title": "Un producto, cuatro detalles",
+    "summary": "Producto central, sombras y mensajes alrededor: una estructura clara para presentar un sérum.",
+    "rationale": "Tomar solamente la distribución del anuncio. Para L’Oreal Revitalift ácido hialurónico, usar su envase y datos comprobados; no trasladar la vitamina C, las naranjas ni los beneficios del ejemplo.",
+    "category": "Skincare",
+    "format": "Diseño de producto",
+    "platform": "Pinterest",
+    "evidence": "editorial",
+    "sourceUrl": "https://www.pinterest.com/pin/281543725092453/",
+    "sourceName": "Pin de referencia visual",
+    "observedAt": "2026-09-09T16:14:53.208Z",
+    "region": "Inspiración visual; fecha y viralidad no verificadas",
+    "productIds": [
+      "383"
+    ],
+    "suggestedSlides": 3,
+    "references": [
+      {
+        "id": "ref-vitamin-c-ad",
+        "url": "https://i.pinimg.com/736x/80/9b/53/809b5326eeada57fb39fb8806824886c.jpg",
+        "sourceUrl": "https://www.pinterest.com/pin/281543725092453/",
+        "title": "Un producto, cuatro detalles"
+      }
+    ],
+    "visualStatus": "example",
+    "saved": false,
+    "palette": [
+      "#edb17e",
+      "#ebf0ed"
+    ],
+    "keywords": [
+      "Skincare",
+      "cosméticos",
+      "diseño de producto"
+    ]
+  },
+  {
+    "id": "visual-skincare-collage",
+    "title": "Tu rutina en un collage",
+    "summary": "Tipografía grande y fotografías en recortes para un carrusel de cuidado facial.",
+    "rationale": "Adaptar la composición a Elaluz Beauty Oil con fotos propias del producto y pasos de uso. Sustituir el antes/después de la referencia por una rutina: no inventar resultados de piel.",
+    "category": "Skincare",
+    "format": "Carrusel",
+    "platform": "Pinterest",
+    "evidence": "editorial",
+    "sourceUrl": "https://www.pinterest.com/pin/9429480466412081/",
+    "sourceName": "Pin de referencia visual",
+    "observedAt": "2026-09-09T16:14:54.253Z",
+    "region": "Inspiración visual; fecha y viralidad no verificadas",
+    "productIds": [
+      "9065"
+    ],
+    "suggestedSlides": 3,
+    "references": [
+      {
+        "id": "ref-skincare-collage",
+        "url": "https://i.pinimg.com/736x/d6/73/99/d6739987556600de61aa9e968968e824.jpg",
+        "sourceUrl": "https://www.pinterest.com/pin/9429480466412081/",
+        "title": "Tu rutina en un collage"
+      }
+    ],
+    "visualStatus": "example",
+    "saved": false,
+    "palette": [
+      "#dedbd5",
+      "#3c3935"
+    ],
+    "keywords": [
+      "Skincare",
+      "cosméticos",
+      "diseño de producto"
+    ]
+  },
+  {
+    "title": "Gloss: colección de tonos con aplicadores y reflejos",
+    "summary": "Referencia concreta de composición cosmética: cuatro glosses en tonos rosados y nude, con aplicadores expuestos y reflejos sobre la superficie. Para ElaBela, crear una fotografía propia del conjunto L.A. Girl y convertirla en un carrusel de producto, detalle y selección de tonos.",
+    "rationale": "Crear una composición propia con el conjunto L.A. Girl del catálogo: portada con los tonos, detalle del aplicador y cierre para elegir. Respetar envases y colores reales. La imagen original quedó guardada y fue revisada visualmente; no se verificaron fecha ni viralidad.",
+    "category": "Labios",
+    "format": "Carrusel",
+    "evidence": "editorial",
+    "sourceUrl": "https://www.pinterest.com/pin/basma-shosha-on-instagram-lip-gloss-in-2024--729794314646780178/",
+    "sourceName": "Pinterest · referencia atribuida a Basma Shosha",
+    "region": "Origen geográfico no verificado; adaptación propuesta para Ciudad del Este, Paraguay, y público brasileño",
+    "suggestedSlides": 3,
+    "productIds": [
+      "13413"
+    ],
+    "palette": [
+      "#EBCBCB",
+      "#C99589",
+      "#F5EFEB"
+    ],
+    "keywords": [
+      "gloss",
+      "aplicadores",
+      "reflejos",
+      "colección de tonos",
+      "fotografía propia"
+    ],
+    "id": "1e81488efbbf4a9185b433b9",
+    "platform": "Pinterest",
+    "observedAt": "2026-09-09T16:34:47.839Z",
+    "saved": false,
+    "references": [
+      {
+        "id": "78c824cb5401538ec445c074",
+        "url": "https://i.pinimg.com/736x/db/da/83/dbda83782e7055471e65b9390f408cd9.jpg",
+        "sourceUrl": "https://www.pinterest.com/pin/basma-shosha-on-instagram-lip-gloss-in-2024--729794314646780178/",
+        "title": "Referencia original · Pinterest · referencia atribuida a Basma Shosha"
+      }
+    ],
+    "visualStatus": "example"
+  },
+  {
+    "title": "Sérum: envase protagonista y tipografía con espacio",
+    "summary": "Pin de un anuncio de sérum con frasco esmerilado, fondo neutro y un titular amplio. Adaptar la jerarquía visual al Belair Skin Science N2: fotografía propia del envase real, nombre legible y una segunda lámina de detalles comprobados de su etiqueta.",
+    "rationale": "El frasco central, la tipografía amplia y el espacio libre dan protagonismo al producto. Adaptar al Belair Skin Science N2 del catálogo usando su envase y datos comprobados; no copiar las promesas del anuncio. Imagen guardada y revisada, sin fecha ni viralidad comprobadas.",
+    "category": "Skincare",
+    "format": "Carrusel",
+    "evidence": "editorial",
+    "sourceUrl": "https://www.pinterest.com/pin/modern-skincare-serum-poster-design-in-2025--27725353951816749/",
+    "sourceName": "Pinterest · Govind Bohara",
+    "region": "Mercado original no verificado; adaptación propuesta para Ciudad del Este, Paraguay, y público brasileño",
+    "suggestedSlides": 2,
+    "productIds": [
+      "3445"
+    ],
+    "palette": [
+      "#F1EDE6",
+      "#D3C6B5",
+      "#37332E"
+    ],
+    "keywords": [
+      "sérum",
+      "envase protagonista",
+      "fondo neutro",
+      "jerarquía tipográfica",
+      "espacio libre"
+    ],
+    "id": "3c7154311e278a4e3957ac94",
+    "platform": "Pinterest",
+    "observedAt": "2026-09-09T16:34:48.646Z",
+    "saved": false,
+    "references": [
+      {
+        "id": "0f8b43b1815f45dd8fa3c18c",
+        "url": "https://i.pinimg.com/736x/64/3b/86/643b86c7f0c4896b1c7ab356296a2406.jpg",
+        "sourceUrl": "https://www.pinterest.com/pin/modern-skincare-serum-poster-design-in-2025--27725353951816749/",
+        "title": "Referencia original · Pinterest · Govind Bohara"
+      }
+    ],
+    "visualStatus": "example"
   }
 ]

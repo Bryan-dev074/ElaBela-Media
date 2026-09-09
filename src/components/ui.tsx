@@ -3,7 +3,7 @@ import { Download, Image as ImageIcon, X, ZoomIn, ZoomOut } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import type { Asset, Reference } from '../../shared/types';
-import { downloadAsset, useAsset } from '../api';
+import { downloadAsset, useAsset, useAssetState } from '../api';
 
 export function Modal({
   open,
@@ -66,14 +66,31 @@ export function AssetImage({ id, alt, preview = true }: { id: string; alt: strin
     </div>
   );
 }
-export function ReferenceImage({ reference, alt }: { reference?: Reference; alt: string }) {
-  const url = useAsset(reference?.assetId);
-  return reference ? (
-    <img src={url || reference.url} alt={alt} loading="lazy" draggable={false} />
+export function ReferenceImage({
+  reference,
+  alt,
+  preview = true,
+}: {
+  reference?: Reference;
+  alt: string;
+  preview?: boolean;
+}) {
+  const loaded = useAssetState(reference?.assetId, preview);
+  const [failedUrl, setFailedUrl] = useState<string>();
+  const url = reference?.assetId ? loaded.url : reference?.url;
+  const failed = loaded.failed || (url !== undefined && failedUrl === url);
+  return reference && url && !failed ? (
+    <img src={url} alt={alt} loading="lazy" draggable={false} onError={() => setFailedUrl(url)} />
   ) : (
     <div className="image-placeholder">
       <ImageIcon size={28} />
-      <span>Referencia por agregar</span>
+      <span>
+        {failed
+          ? 'No se pudo cargar esta imagen'
+          : reference?.assetId
+            ? 'Cargando referencia…'
+            : 'Fuente sin imagen disponible'}
+      </span>
     </div>
   );
 }

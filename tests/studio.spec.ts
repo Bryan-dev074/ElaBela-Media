@@ -24,7 +24,8 @@ test('save inspiration, select PT copy, mix proposals, persist original quality 
   await page.getByRole('button', { name: /Ideas guardadas/ }).click();
   await expect(page.locator('.trend-card')).toHaveCount(1);
   await page.getByRole('button', { name: 'Ver idea: Brillo que se siente' }).click();
-  await page.getByRole('button', { name: 'Crear con esta idea' }).click();
+  await page.getByRole('button', { name: 'Elegir referencia: Referencia de prueba', exact: true }).click();
+  await page.getByRole('button', { name: 'Crear con esta imagen' }).click();
   await page.getByLabel('Nombre de la campaña').fill('E2E — campaña de prueba');
   await page.getByLabel('Idioma de la publicación').selectOption('pt');
   await page.getByRole('button', { name: 'Continuar con los textos' }).click();

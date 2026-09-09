@@ -152,5 +152,37 @@ export function matchesRadarTopic(
 export function radarResearchQuery(topic: RadarTopic | undefined, style: ResearchStyle): string {
   const direction =
     style === 'Inspiración' ? 'tendencias y estilos visuales de marketing' : style.toLocaleLowerCase();
-  return `Buscá ${direction} sobre ${topic?.prompt || 'belleza y cosméticos'} para adaptar a productos reales de ElaBela. Explorá Pinterest, Instagram y otras redes con fuentes originales e imágenes de referencia cuando estén disponibles. Público de Paraguay y Brasil, en español y portugués. Distinguí tendencias actuales de inspiración editorial.`;
+  return `Buscá ${direction} sobre ${topic?.prompt || 'belleza y cosméticos'} para ElaBela. Priorizá pins y posts de cosméticos con imágenes de la fuente original: anuncios, collages o carruseles. Explorá Pinterest e Instagram. Excluí deporte, moda ajena y portadas de informes. Público Paraguay/Brasil, español/portugués. Distinguí tendencias de inspiración editorial.`;
+}
+
+export function hasBeautySubject(value: string): boolean {
+  const text = ` ${normalizeRadarText(value)} `;
+  const terms = [
+    ...radarTopics.filter((topic) => topic.id !== 'lifestyle').flatMap((topic) => [...topic.terms]),
+    'belleza',
+    'beleza',
+    'beauty',
+    'cosmetico',
+    'cosmeticos',
+    'cosmetic',
+    'cosmetics',
+    'maquilhagem',
+    'lipgloss',
+    'lip oil',
+    'limpieza facial',
+    'sunscreen',
+    'eyeshadow',
+    'mascara',
+    'eyeliner',
+    'foundation',
+    'concealer',
+    'lipbalm',
+  ];
+  return terms.some((term) => text.includes(` ${term} `));
+}
+
+export function hasUnrelatedSubject(value: string): boolean {
+  return /\b(football|futbol|futebol|soccer|stadium|basketball|deportes|sports|home decor|living room|interior design|fashion outfits|outfits collection)\b/.test(
+    normalizeRadarText(value),
+  );
 }

@@ -7,11 +7,11 @@ Fecha: 9 de septiembre de 2026. Entorno real: Windows, PowerShell, Node 24.17.0,
 | Comprobación | Resultado observado |
 |---|---|
 | `npm run typecheck` | Correcto; TypeScript estricto |
-| `npm run lint` | 68 archivos sin errores ni advertencias de Biome |
-| `npm test` | 86 pruebas, 15 archivos, todas aprobadas |
+| `npm run lint` | 78 archivos sin errores ni advertencias de Biome |
+| `npm test` | 130 pruebas, 19 archivos, todas aprobadas |
 | `npm run build` | Build Vite correcto |
-| `npm run check:bundle` | 113,1 KiB gzip de JS inicial; presupuesto 220 KiB |
-| `npm run test:e2e` | 15 pruebas aprobadas en Chrome; puerto aislado 5187 |
+| `npm run check:bundle` | 114,1 KiB gzip de JS inicial; presupuesto 220 KiB |
+| `npm run test:e2e` | 22 pruebas aprobadas en Chrome; puerto aislado 5187 |
 | `npm audit --audit-level=high` | 0 vulnerabilidades reportadas |
 | Axe WCAG 2 A/AA y 2.1 AA | Sin infracciones medidas en radar escritorio/móvil, detalle de fuente, editor móvil, propuestas y confirmación |
 | Radar real con 8 ideas, incluida referencia faltante | Sin errores de página ni infracciones axe después de ajustar el contraste del placeholder |
@@ -62,9 +62,23 @@ Impeccable y revisión visual aplicados a escritorio y móvil. El detector se co
 
 Se revisaron y corrigieron: identidad de imágenes Meta, junctions externos, aprobación por revisión, borradores y respuestas asíncronas antiguas, foco móvil, cierre atómico, referencia omitida en búsquedas posteriores, bytes originales inválidos, procedencia de imagen de la API, eventos URL de Codex, UTF-8 dividido y registro de PID. No quedaron hallazgos importantes abiertos en la revisión independiente.
 
+## Referencias concretas y generación en el chat
+
+El servicio real se reinició de forma segura sin trabajos activos. Informa `generationProvider: codex-chat`. Se importaron cinco referencias cosméticas revisadas visualmente, con fuente original y assets locales; los once hallazgos históricos conservan IDs/favoritos como contexto sin portadas generales. La campaña existente se conserva. La semilla anterior y el estado tienen copias fechadas privadas; no se eliminaron assets históricos.
+
+Se comprobó en la página real que cargan las cinco imágenes, se puede ampliar y seleccionar una referencia y no hay desbordamiento horizontal a 390px. Axe devolvió cero infracciones en galería de escritorio, detalle y móvil. Se revisaron las capturas. La selección de una segunda imagen sobrevive a crear/recargar la campaña en E2E. Una referencia sin imagen muestra su estado; no se sustituye por la primera foto de otra elección. Un error de descarga no se presenta como carga perpetua.
+
+Los pedidos del chat se prueban sin clave API, con captura de inputs, contenido obsoleto, cancelación, reintentos idénticos, sustitución de destinos, importación original byte a byte y composición independiente. El estudio permite reabrir/copiar el pedido, ofrece selección manual si el portapapeles falla y conserva el progreso tras recargar. La descripción y composición histórica pueden editarse aunque el radar retire su referencia. No se generó una campaña real como prueba.
+
+La nueva comprobación del botón inició el job `4dd7078d-6d2f-4493-8b0d-bc2dc743f237`, que terminó `completed`: añadió dos pins individuales de gloss y sérum, descargó ambas imágenes y las guardó como referencias. La revisión visual confirmó el encaje cosmético, y los productos candidatos 13413 y 3445 existen en el catálogo. Se corrigieron sus textos de presentación tras la revisión, conservando el registro original del investigador. La galería queda con siete ejemplos; los dos nuevos son inspiración editorial, sin viralidad local verificada.
+
+Tras la última corrección de caché se reinició nuevamente sin trabajos activos. Las siete imágenes siguen cargando, con cero infracciones axe en escritorio/detalle/móvil. La comparación del estado previo confirma la campaña byte a byte equivalente como JSON, los once IDs históricos conservados y todos sus favoritos intactos. Las cinco regresiones adicionales impiden que las referencias anteriores o importadas recuperen URLs de fútbol/logos; preservan los originales archivados y las imágenes válidas.
+
+Las regresiones de investigación excluyen contexto/portadas, páginas bloqueadas, temas ajenos, logos/placeholders y referencias no respaldadas por su fuente. Codex y el proveedor API opcional usan el mismo filtro de URL de imagen. Este filtro usa metadatos y no sustituye inspección visual. La revisión independiente encontró y resolvió las referencias históricas bloqueando ediciones, el fallback a la primera foto no elegida y la diferencia del filtro API. La prueba real también identificó el límite de consulta desalineado: la UI ahora respeta los 500 caracteres aceptados por el servidor. Las consultas sugeridas se acortaron y una regresión comprueba todas las categorías/estilos con espacio para una preferencia adicional del usuario; el E2E conserva el texto editado sin truncarlo.
+
 ## Límites externos pendientes
 
-- No se ejecutó generación de campaña mediante API de imágenes: falta configurar la clave local y elegir/aprobar una campaña.
+- La generación predeterminada usa la herramienta del chat mediante un pedido copiado por Bryan. Falta ejecutar una primera campaña aprobada con sus productos y logo; no se exige clave API ni se afirma que la página accione automáticamente esa herramienta.
 - No se publicó contenido real en Instagram/Facebook. Permisos y respuesta actuales de Meta se comprobarán al publicar la primera campaña aprobada; una coincidencia visual no recupera un ID IG perdido.
 - Vercel queda preparado como frontend estático. Bryan realizará el despliegue y entonces podrá comprobarse el permiso de red local y emparejamiento del dominio HTTPS real.
 - GitHub Actions repitió todas las comprobaciones en Linux: tipos, lint, 85 tests, build, presupuesto, navegador y auditoría aprobaron en la [ejecución 34362563333](https://github.com/Bryan-dev074/ElaBela-Media/actions/runs/34362563333), correspondiente al commit de implementación `5f7e232`. El SHA de `main` se contrastó con el remoto después del push.

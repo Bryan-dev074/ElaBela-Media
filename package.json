@@ -20,6 +20,7 @@
     "reconcile": "tsx scripts/reconcile.ts",
     "catalogo:actualizar": "tsx scripts/sync-catalogue.ts",
     "trends:importar": "tsx scripts/import-trends.ts",
+    "codex:importar": "tsx scripts/codex-import.ts",
     "check:bundle": "node scripts/check-bundle.mjs"
   },
   "dependencies": {

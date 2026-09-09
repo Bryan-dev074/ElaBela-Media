@@ -15,7 +15,7 @@ Requisitos: Windows, Node 24.17 o posterior de la rama 24, npm, y el publicador 
 1. **Radar creativo:** elegí Maquillaje, Skincare, Uñas, Fragancias, Cabello o Estilo de vida alrededor de la esfera. La selección filtra la biblioteca y orienta la próxima búsqueda. Elegí inspiración, carruseles, tutoriales, humor o diseño de producto. **Explorar todas las categorías** abre la búsqueda general, limpia los filtros y conserva el estilo elegido. Revisá el texto y pulsá **Iniciar investigación** para usar Codex en esta PC. Las referencias muestran imagen, logo de la plataforma, fuente, fecha y motivo. Guardá las favoritas; sobreviven a nuevas búsquedas.
 2. **Crear campaña:** elegí productos, español/PT-BR y entre 1 y 10 piezas. Tres propuestas de tres piezas son nueve imágenes separadas.
 3. **Textos:** elegí y editá una de las tres opciones de titulares, textos de cada imagen y descripción. Aprobá antes de generar.
-4. **Propuestas:** generá las piezas o importá PNG/JPEG/WebP 4:5. Cada propuesta conserva sus originales; podés regenerar una pieza individual.
+4. **Propuestas:** pulsá **Preparar 3 propuestas en Codex**, copiá el pedido y pegalo en este chat. Codex genera cada imagen con su herramienta del chat e importa los originales PNG/JPEG/WebP 4:5 en la propuesta y posición correspondientes. Podés pedir otra versión de una pieza. La página muestra el avance; preparar el pedido no inicia la generación por sí solo.
 5. **Tu carrusel final:** arrastrá imágenes al orden final o usá los botones de añadir, reemplazar y mover. Mezclar no altera las propuestas. Abrí el visor al 100 % y descargá el original.
 6. **Revisar y publicar:** comprobá texto, producto, envase y orden. La confirmación explícita envía a Instagram y Facebook. Si el resultado queda incierto/parcial, **Consultar estado en Meta** solo consulta; no repite el envío.
 
@@ -27,15 +27,16 @@ Copiá `.env.example` a `.env` únicamente si este último no existe. Nunca suba
 
 - `ELABELA_RESEARCH_PROVIDER`: `codex` de forma predeterminada. Usa la sesión y los límites de Codex de esta PC, sin clave API. `api` activa el proveedor API opcional.
 - `ELABELA_CODEX_PATH`: opcional si el ejecutable `codex` no está en PATH.
-- `OPENAI_API_KEY`: necesaria para generar imágenes desde la página y para textos personalizados mediante API. Estas llamadas utilizan la cuenta API del proveedor y pueden tener costo.
+- `ELABELA_GENERATION_PROVIDER`: `codex-chat` de forma predeterminada, incluso si existe una clave API. Prepara pedidos para generar en este chat e importar originales; los textos iniciales son opciones locales editables. No requiere `OPENAI_API_KEY`.
+- `OPENAI_API_KEY`: solo para proveedores API opcionales seleccionados explícitamente. No se utiliza para generar imágenes ni textos en el flujo predeterminado del chat. Las llamadas API opcionales tienen facturación separada.
 - `OPENAI_IMAGE_MODEL`: perfil configurado `gpt-image-2.5-sunburst`, alta calidad, PNG 1536×1920 (4:5).
 - `OPENAI_SEARCH_MODEL` y `OPENAI_COPY_MODEL`: `gpt-6-astra` para el proveedor API opcional y los textos, respectivamente.
 - `META_BUSINESS_DIR`, `META_PAGE_ID`, `META_INSTAGRAM_BUSINESS_ID`: conexión con el publicador existente. El worker descifra el token protegido de Windows; no lo manda al navegador.
 - `ELABELA_WEB_URL`: origen HTTPS exacto de tu web cuando la despliegues.
 
-Reiniciá el servicio después de cambiar `.env` o actualizar código. Sin clave de generación siguen disponibles la investigación con Codex, biblioteca, productos, tres opciones locales de texto editables, importación de imágenes, composición y visor. Cada investigación tiene un límite de diez minutos y no se repite automáticamente si falla. Las plataformas que impiden descargar una referencia conservan su enlace original.
+Reiniciá el servicio después de cambiar `.env` o actualizar código. Cada investigación tiene un límite de diez minutos y no se repite automáticamente si falla. La vista **Referencias visuales** prioriza ejemplos concretos de cosméticos con imagen; **Todas las ideas** conserva el contexto sin fingir imágenes disponibles. Podés ampliar y elegir una imagen específica antes de crear la campaña.
 
-**Estado de integración:** el catálogo inicial contiene 1.573 productos, 199 marcas y 61 categorías (captura del 9/9/2026). La selección inicial tiene seis direcciones visuales con imágenes locales. Se probó el botón real con Codex: añadió dos ideas nuevas a la biblioteca de esta PC, una con imagen descargada y otra con enlace al informe sin imagen extraíble. Los tests utilizan imágenes y transporte Meta identificados como prueba. No se generó una campaña paga ni se publicó contenido real durante la implementación. Encontrar la credencial Meta no prueba permisos de escritura vigentes. La primera campaña aprobada permitirá comprobar el recorrido real del proveedor y de Meta.
+**Estado de integración:** el catálogo inicial contiene 1.573 productos, 199 marcas y 61 categorías (captura del 9/9/2026). La selección inicial contiene siete referencias concretas de cosméticos revisadas visualmente; dos provienen de la nueva búsqueda comprobada desde el botón. Los tests de generación/importación usan imágenes identificadas como prueba; no se generó ni publicó una campaña real durante esta implementación. El primer pedido aprobado permitirá comprobar la generación del chat con sus productos y logo. Encontrar la credencial Meta no prueba permisos de escritura vigentes.
 
 ## Subir la interfaz a Vercel
 
@@ -50,7 +51,7 @@ Vercel sirve la interfaz; no accede a `D:`. La web abierta desde un teléfono no
 - `.local/`: estado, revisiones, trabajos, emparejamiento y punteros de recuperación. Privado.
 - `datos/catalogo/`: capturas completas, con fecha; precios/stock no son en tiempo real.
 - `data/trends.json`: selección editorial inicial, con URLs públicas. `data/references/`: copias locales de las imágenes.
-- `contenido/AAAA/MM/id/`: originales, previews, entradas de generación y staging/checkpoints de publicaciones.
+- `contenido/AAAA/MM/id/`: originales, previews, pedidos-codex con brief/manifiesto/fuentes y staging/checkpoints de publicaciones.
 - `investigacion/AAAA-MM-DD/`: hallazgos y evidencia.
 
 La selección final es una lista ordenada de IDs en el estado de campaña. Al publicar se crea un manifiesto y copias JPEG 1080×1350, manteniendo los masters intactos. Hacé copia de `.local`, `contenido`, `datos`, `data/references` y `logo` con el servicio detenido. No borres checkpoints para intentar publicar de nuevo.
@@ -61,12 +62,13 @@ Comandos desde la raíz:
 npm run catalogo:actualizar -- --comprobar # Verificar fuente sin reemplazar datos
 npm run catalogo:actualizar              # Captura nueva; luego reiniciar
 npm run trends:importar -- ruta/hallazgos.json
+npm run codex:importar -- --help          # Importar salida del chat en su pedido/posición
 npm run reconcile -- --help
 npm run dev                             # Frontend de desarrollo; servicio aparte
 npm run server
 ```
 
-[Cómo buscar y curar ideas](docs/operacion/buscar-trends.md) · [Selección inicial](investigacion/2026-09-09/trends.md) · [Diseño](DESIGN.md) · [Decisión de arquitectura](docs/adr/0001-arquitectura-local-propuesta.md) · [Librerías](LIBRERIAS.md).
+[Cómo buscar y curar ideas](docs/operacion/buscar-trends.md) · [Generar desde el chat](docs/operacion/generar-en-chat.md) · [Referencias seleccionadas](investigacion/2026-09-09/referencias-cosmeticos.md) · [Diseño](DESIGN.md) · [Decisión de arquitectura](docs/adr/0001-arquitectura-local-propuesta.md) · [Librerías](LIBRERIAS.md).
 
 ## Verificación
 

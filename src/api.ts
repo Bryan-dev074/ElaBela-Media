@@ -45,12 +45,14 @@ async function assetBlob(id: string, preview: boolean) {
   return URL.createObjectURL(await response.blob());
 }
 export function useAsset(id?: string | null, preview = true) {
-  const [url, setUrl] = useState<string>();
+  return useAssetState(id, preview).url;
+}
+export function useAssetState(id?: string | null, preview = true) {
+  const key = id ? `${connection().base}/${id}/${preview}` : undefined;
+  const [state, setState] = useState<{ key?: string; url?: string; failed: boolean }>({ failed: false });
   useEffect(() => {
-    setUrl(undefined);
-    if (!id) return;
+    if (!id || !key) return;
     let active = true;
-    const key = `${connection().base}/${id}/${preview}`;
     let blob = blobs.get(key);
     if (!blob) {
       blob = assetBlob(id, preview);
@@ -58,14 +60,17 @@ export function useAsset(id?: string | null, preview = true) {
     }
     blob
       .then((value) => {
-        if (active) setUrl(value);
+        if (active) setState({ key, url: value, failed: false });
       })
-      .catch(() => blobs.delete(key));
+      .catch(() => {
+        blobs.delete(key);
+        if (active) setState({ key, failed: true });
+      });
     return () => {
       active = false;
     };
-  }, [id, preview]);
-  return url;
+  }, [id, key, preview]);
+  return key && state.key === key ? state : { url: undefined, failed: false };
 }
 export async function downloadAsset(id: string, filename: string) {
   const url = await assetBlob(id, false);

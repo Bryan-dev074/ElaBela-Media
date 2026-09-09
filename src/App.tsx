@@ -49,6 +49,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ message: string; error: boolean }>();
   const [newTrend, setNewTrend] = useState<Trend>();
+  const [newReferenceId, setNewReferenceId] = useState<string>();
   const [connectOpen, setConnectOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileNavigation, setMobileNavigation] = useState(() => matchMedia('(max-width: 760px)').matches);
@@ -350,7 +351,10 @@ export default function App() {
                     working={busy}
                     researchProvider={data.status.researchProvider}
                     searchJob={[...data.jobs].reverse().find((job) => job.type === 'search')}
-                    onUse={setNewTrend}
+                    onUse={(trend, referenceId) => {
+                      setNewReferenceId(referenceId);
+                      setNewTrend(trend);
+                    }}
                     onSave={(trend) =>
                       void run(() =>
                         request(`/api/trends/${trend.id}`, {
@@ -406,7 +410,9 @@ export default function App() {
                                   <AssetImage id={cover} alt={item.title} />
                                 ) : (
                                   <ReferenceImage
-                                    reference={trend?.references[0]}
+                                    reference={trend?.references.find(
+                                      (reference) => reference.id === item.referenceId,
+                                    )}
                                     alt={`Referencia para ${item.title}`}
                                   />
                                 )}
@@ -531,6 +537,7 @@ export default function App() {
         {newTrend && (
           <CreateForm
             trend={newTrend}
+            referenceId={newReferenceId}
             onError={reportError}
             onCreate={async (input) => {
               const created = await post<Campaign>('/api/campaigns', input);
@@ -636,10 +643,12 @@ function ConnectionForm({
 
 function CreateForm({
   trend,
+  referenceId,
   onCreate,
   onError,
 }: {
   trend: Trend;
+  referenceId?: string;
   onCreate: (input: CreateCampaign) => Promise<void>;
   onError: (message: string) => void;
 }) {
@@ -656,6 +665,7 @@ function CreateForm({
         void onCreate({
           title,
           trendId: trend.id,
+          referenceId,
           productIds: selected,
           language,
           slideCount: count,
@@ -665,6 +675,11 @@ function CreateForm({
           .finally(() => setBusy(false));
       }}
     >
+      {referenceId && (
+        <p className="selected-reference-note">
+          Referencia elegida: {trend.references.find((reference) => reference.id === referenceId)?.title}
+        </p>
+      )}
       <div className="brief-fields">
         <label className="field">
           Nombre de la campaña
@@ -805,12 +820,18 @@ function Settings({
           <Sparkles size={22} />
           <h2>Generación de imágenes</h2>
           <p>
-            {data.status.generationConfigured
-              ? 'Hay una clave configurada en el servicio. Cada generación utiliza tu cuenta del proveedor.'
-              : 'Podés investigar con Codex e importar imágenes. Para generar imágenes desde la página, configurá OPENAI_API_KEY en el archivo .env local.'}
+            {data.status.generationProvider === 'codex-chat'
+              ? 'Prepará el pedido con tus textos aprobados y llevá la instrucción a este chat de Codex. Las imágenes se generan aquí y se incorporan al estudio en su calidad original, sin usar una API de generación aparte.'
+              : data.status.generationConfigured
+                ? 'Hay una clave configurada en el servicio. Cada generación utiliza tu cuenta del proveedor.'
+                : 'Podés investigar con Codex e importar imágenes. Para generar imágenes desde la página, configurá OPENAI_API_KEY en el archivo .env local.'}
           </p>
           <span className="tag">
-            {data.status.generationConfigured ? 'Configurada · uso con costo' : 'Pendiente de configurar'}
+            {data.status.generationProvider === 'codex-chat'
+              ? 'Generación desde el chat de Codex'
+              : data.status.generationConfigured
+                ? 'API opcional · uso con costo'
+                : 'Servicio pendiente de actualizar'}
           </span>
         </section>
         <section className="settings-panel">

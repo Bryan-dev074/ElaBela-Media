@@ -208,6 +208,100 @@
   font-size: var(--text-body);
   color: var(--ink);
 }
+.reference-views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0;
+  border: 0;
+  padding: 0;
+}
+.reference-views button {
+  padding: 10px 16px;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+  font-size: var(--text-body);
+}
+.reference-views button[aria-pressed="true"] {
+  color: var(--accent-deep);
+  background: #eee5f7;
+  border-color: #bca0d2;
+}
+.visual-library {
+  display: block;
+  columns: 3;
+  column-gap: 24px;
+}
+.visual-library .trend-card {
+  break-inside: avoid;
+  margin-bottom: 30px;
+}
+.visual-library .trend-image {
+  aspect-ratio: auto;
+}
+.visual-library .image-placeholder {
+  aspect-ratio: 4 / 5;
+}
+.reference-enlarge {
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  position: relative;
+}
+.reference-enlarge > span {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px 11px;
+  font-size: var(--text-body);
+}
+.reference-choice.is-chosen .reference-enlarge {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+.reference-choice-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+.reference-original {
+  max-height: 70vh;
+  overflow: auto;
+  margin-top: 24px;
+}
+.reference-original img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.selected-reference-note {
+  margin: 20px 0 8px;
+  font-size: var(--text-body);
+  color: var(--accent-deep);
+}
+@media (max-width: 1100px) {
+  .visual-library {
+    columns: 2;
+  }
+}
+@media (max-width: 560px) {
+  .visual-library {
+    columns: 1;
+  }
+}
 .radar-direction {
   max-width: 350px;
   padding: 6px 0 4px;
@@ -369,6 +463,13 @@
   display: block;
   width: 13px;
   height: 13px;
+}
+.visual-library .trend-image > img {
+  height: auto;
+  display: block;
+}
+.visual-library .trend-image:hover > img {
+  transform: none;
 }
 .social-source[data-platform="pinterest"] .social-source-icon {
   background: #fbe8ec;

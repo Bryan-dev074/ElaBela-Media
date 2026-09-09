@@ -4,8 +4,10 @@ import { loadEnvFile } from 'node:process';
 import { pathToFileURL } from 'node:url';
 import fastifyStatic from '@fastify/static';
 import { buildApp, type LocalApp } from './app.js';
+import { createCodexGeneration } from './codex-generation.js';
 import { createCodexResearch } from './codex-research.js';
 import { codexAvailable } from './codex-runner.js';
+import { generationProvider } from './contracts.js';
 import { createCreativeIntegrations } from './providers.js';
 import { createPublisher } from './publisher.js';
 import { acquireServiceLock } from './service-lock.js';
@@ -22,14 +24,20 @@ export async function startServer(root = process.cwd()): Promise<LocalApp> {
     const indexFile = join(distribution, 'index.html');
     const hasFrontend = await exists(indexFile);
     const researchProvider = process.env.ELABELA_RESEARCH_PROVIDER === 'api' ? 'api' : 'codex';
+    const creativeProvider = generationProvider();
     const researchReady =
       researchProvider === 'codex' ? await codexAvailable() : Boolean(process.env.OPENAI_API_KEY);
     const app = await buildApp({
       root,
       recoverJobs: true,
       researchStatus: { researchProvider, researchReady },
+      generationStatus: {
+        generationProvider: creativeProvider,
+        generationConfigured: creativeProvider === 'codex-chat' || Boolean(process.env.OPENAI_API_KEY),
+      },
       integrations: {
         ...createCreativeIntegrations(),
+        ...(creativeProvider === 'codex-chat' ? createCodexGeneration() : {}),
         ...createPublisher(),
         ...(researchProvider === 'codex' ? createCodexResearch() : {}),
       },

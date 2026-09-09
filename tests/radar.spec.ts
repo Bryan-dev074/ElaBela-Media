@@ -80,6 +80,9 @@ async function radarFixture(page: Page, jobs: Job[] = []) {
   });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Tu próxima gran idea está acá.' })).toBeVisible();
+  // These fixtures intentionally have no images; exercise category/source filtering in the all-ideas view.
+  await page.getByRole('button', { name: 'Todas las ideas', exact: true }).click();
+  await page.evaluate(() => window.scrollTo(0, 0));
   return { searches, state };
 }
 
@@ -143,6 +146,7 @@ test('explore all categories opens general research, clears earlier filters and 
   await exploreAll.click();
   const query = page.getByRole('textbox', { name: 'Qué querés encontrar' });
   await expect(query).toBeVisible();
+  await expect(query).toHaveAttribute('maxlength', '500');
   await expect(query).toHaveValue(/sobre belleza y cosméticos/);
   expect(fixture.searches).toEqual([]);
   await page.keyboard.press('Escape');

@@ -24,6 +24,6 @@ Cada ficha distingue señal reciente, predicción anual e inspiración editorial
 - App-server persistente: añade un protocolo de sesiones y control que no hace falta para búsquedas independientes de un usuario. `exec --json` resuelve el alcance actual.
 - Automatización periódica o control remoto: no se configura; el usuario inicia la investigación desde el botón.
 
-La generación visual desde la app mantiene su integración API separada. La suscripción de Codex no se presenta como una clave ni como crédito para esa API.
+Decisión inicial reemplazada por [ADR 0004](0004-referencias-visuales-y-generacion-chat.md): la generación predeterminada prepara un pedido para el chat, sin API paga. La API separada queda opt-in explícito. La suscripción de Codex no se presenta como una clave ni como crédito para esa API.
 
 Referencias oficiales: [ejecución no interactiva](https://learn.chatgpt.com/docs/non-interactive-mode), [configuración](https://learn.chatgpt.com/docs/config-file/config-reference). Opciones contrastadas con `codex exec --help` de la instalación local.

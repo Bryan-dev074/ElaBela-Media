@@ -1,5 +1,15 @@
 import { expect, test } from 'vitest';
-import { matchesRadarTopic, radarTopics } from './radar';
+import { matchesRadarTopic, radarResearchQuery, radarTopics, researchStyles } from './radar';
+
+test('every generated research query fits the API limit with room for a user preference', () => {
+  for (const topic of [undefined, ...radarTopics]) {
+    for (const style of researchStyles) {
+      expect(
+        `${radarResearchQuery(topic, style)} Usá tonos ciruela y productos de mi selección.`.length,
+      ).toBeLessThanOrEqual(500);
+    }
+  }
+});
 
 test('nail discovery distinguishes the Spanish letter ñ from the pronoun unas', () => {
   const nails = radarTopics.find((topic) => topic.id === 'nails');

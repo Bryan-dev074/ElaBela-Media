@@ -4,7 +4,9 @@
 
 En **Radar creativo → Investigar con Codex**, escribí el objetivo o categoría. El servicio inicia Codex en esta PC, con su sesión existente, consulta fuentes y devuelve las ideas al radar. La cuenta de Codex debe tener sesión y uso disponible; no se necesita una clave API para investigar. Mientras corre podés seguir explorando. La PC y el servicio deben seguir encendidos.
 
-El resultado conserva plataforma, dirección original, fecha y contexto. Las imágenes se copian desde los metadatos públicos de fuentes compatibles; si la plataforma no permite descargarlas, la ficha conserva el enlace. Las fuentes no se presentan como una señal viral si solo respaldan una predicción anual o inspiración editorial. Las favoritas conservan sus referencias aunque la siguiente búsqueda las omita.
+El resultado conserva plataforma, dirección original, fecha y contexto. Buscar piezas concretas de cosméticos y productos de ElaBela: composición publicitaria, tutorial, maquillaje, textura o rutina de cuidado. La imagen debe corresponder al pin/post citado; excluir deporte, moda general y portadas de informes. Los metadatos de la página se verifican aun cuando Codex registre una apertura. La clasificación automática es un filtro textual; la curación necesita inspección visual real.
+
+Las imágenes accesibles se guardan localmente. Informes/tableros generales quedan como contexto, y una fuente bloqueada conserva su enlace sin simular una imagen. La vista predeterminada muestra referencias visuales; Todas las ideas permite consultar el contexto. Elegir una imagen en el detalle conserva su identificador en la campaña. Las fuentes no se presentan como virales si solo respaldan una predicción anual o inspiración editorial. Se conservan favoritos y referencias válidas, sin recuperar imágenes rechazadas en una nueva búsqueda.
 
 El registro queda en `investigacion/AAAA-MM-DD/codex-ID/`, junto con consulta, esquema, salida del investigador y hallazgos respaldados por aperturas de Codex o consultas independientes a las páginas originales. Esto es una investigación independiente iniciada por el botón, no un monitoreo permanente ni un envío de mensajes al chat actual.
 

@@ -6,13 +6,14 @@ import type {
   Asset,
   Bootstrap,
   Campaign,
+  CodexGenerationRequest,
   CreateCampaign,
   Job,
   Product,
   ServiceStatus,
   Trend,
 } from '../shared/types.js';
-import { ServiceError } from './contracts.js';
+import { codexContentHash, generationProvider, pendingCodexRequest, ServiceError } from './contracts.js';
 
 interface AssetPaths {
   original: string;
@@ -107,7 +108,8 @@ export class Store {
   async bootstrap(): Promise<Bootstrap> {
     const status: ServiceStatus = {
       connected: true,
-      generationConfigured: Boolean(process.env.OPENAI_API_KEY),
+      generationProvider: generationProvider(),
+      generationConfigured: generationProvider() === 'codex-chat' || Boolean(process.env.OPENAI_API_KEY),
       metaConfigured: await this.hasProtectedMetaToken(),
       catalogueCount: this.products.length,
       catalogueObservedAt: this.catalogueObservedAt,
@@ -176,11 +178,13 @@ export class Store {
   async createCampaign(input: CreateCampaign): Promise<Campaign> {
     return this.withWrite(async () => {
       this.assertAcceptingWork();
+      this.validateReference(input);
       const now = new Date().toISOString();
       const campaign: Campaign = {
         id: randomUUID(),
         title: input.title,
         trendId: input.trendId,
+        referenceId: input.referenceId,
         productIds: [...input.productIds],
         language: input.language,
         slideCount: input.slideCount,
@@ -213,6 +217,7 @@ export class Store {
     return this.withWrite(async () => {
       this.assertCampaignEditable(id);
       const current = this.getCampaign(id);
+      this.assertNoPendingCodexRequest(current);
       if (current.revision !== revision || current.approvedRevision !== revision)
         throw new ServiceError('La publicación necesita aprobar esta revisión exacta.', 409);
       const selected = current.copyOptions.find((option) => option.id === current.selectedCopyId);
@@ -275,6 +280,7 @@ export class Store {
     return this.withWrite(async () => {
       this.assertCampaignEditable(id);
       const current = this.getCampaign(id);
+      this.assertNoPendingCodexRequest(current);
       if (current.revision !== revision)
         throw new ServiceError('La campaña cambió antes de iniciar la generación. Revisá sus textos.', 409);
       const copy = current.copyOptions.find((option) => option.id === current.selectedCopyId);
@@ -302,6 +308,7 @@ export class Store {
       if (index < 0) throw new ServiceError('Campaña no encontrada', 404);
       const campaign = this.state.campaigns[index];
       if (!campaign) throw new ServiceError('Campaña no encontrada', 404);
+      this.assertNoPendingCodexRequest(campaign);
       if (campaign.revision !== revision) throw new ServiceError('Conflicto de revisión', 409);
       if (!campaign.copyApproved || !campaign.selectedCopyId) {
         throw new ServiceError('El texto seleccionado debe estar aprobado', 400);
@@ -331,6 +338,172 @@ export class Store {
       await this.persist();
       return structuredClone(approved);
     });
+  }
+
+  async prepareCodexRequest(
+    id: string,
+    revision: number,
+    selection: { variantId?: string; slot?: number },
+    prepare: (
+      campaign: Campaign,
+      targets: CodexGenerationRequest['targets'],
+    ) => Promise<CodexGenerationRequest>,
+  ): Promise<Campaign> {
+    return this.withWrite(async () => {
+      this.assertCampaignEditable(id);
+      const current = this.getCampaign(id);
+      if (current.revision !== revision)
+        throw new ServiceError('La campaña cambió. Actualizá la página y revisá el pedido.', 409);
+      const copy = current.copyOptions.find((option) => option.id === current.selectedCopyId);
+      if (!current.copyApproved || !copy || copy.slides.length !== current.slideCount)
+        throw new ServiceError('Elegí y aprobá el texto antes de preparar el pedido.', 400);
+      if (current.productIds.length < 1 || current.productIds.length > 8)
+        throw new ServiceError('Elegí entre uno y ocho productos para esta campaña.', 400);
+      if (!!selection.variantId !== (selection.slot !== undefined))
+        throw new ServiceError('Indicá propuesta y pieza para regenerar.', 400);
+      const previous = current.codexRequest;
+      if (pendingCodexRequest(previous) && previous) {
+        const sameSelection = selection.variantId
+          ? previous.targets.length === 1 &&
+            previous.targets[0]?.variantId === selection.variantId &&
+            previous.targets[0]?.slot === selection.slot
+          : previous.targets.every((target) => target.originalAssetId === null) &&
+            current.variants.every((variant) =>
+              variant.assetIds.every(
+                (asset, slot) =>
+                  asset ||
+                  previous.targets.some((target) => target.variantId === variant.id && target.slot === slot),
+              ),
+            );
+        if (!sameSelection || previous.contentHash !== codexContentHash(current))
+          throw new ServiceError(
+            'Cancelá el pedido pendiente antes de preparar otro contenido o destino.',
+            409,
+          );
+        for (const target of previous.targets) this.assertCodexTarget(current, target);
+        return current;
+      }
+      this.validateReference(current);
+      const targets = current.variants
+        .flatMap((variant) =>
+          variant.assetIds.map((assetId, slot) => ({
+            variantId: variant.id,
+            slot,
+            originalAssetId: assetId,
+          })),
+        )
+        .filter((target) =>
+          selection.variantId
+            ? target.variantId === selection.variantId && target.slot === selection.slot
+            : target.originalAssetId === null,
+        );
+      if (!targets.length)
+        throw new ServiceError('No hay piezas pendientes. Elegí una pieza válida para regenerar.', 400);
+      const request = await prepare(current, targets);
+      if (
+        request.contentHash !== codexContentHash(current) ||
+        request.total !== targets.length ||
+        request.status !== 'ready'
+      )
+        throw new ServiceError('El pedido preparado no coincide con la campaña.', 409);
+      const next = {
+        ...current,
+        codexRequest: structuredClone(request),
+        revision: current.revision + 1,
+        approvedRevision: null,
+        updatedAt: new Date().toISOString(),
+      };
+      this.state.campaigns[this.state.campaigns.findIndex((item) => item.id === id)] = next;
+      await this.persist();
+      return structuredClone(next);
+    });
+  }
+
+  async cancelCodexRequest(id: string, requestId: string): Promise<Campaign> {
+    return this.withWrite(async () => {
+      this.assertCampaignEditable(id);
+      const current = this.getCampaign(id);
+      if (!current.codexRequest || current.codexRequest.id !== requestId)
+        throw new ServiceError('El pedido ya no es el vigente. Actualizá la campaña.', 409);
+      if (current.codexRequest.status === 'cancelled') return current;
+      if (current.codexRequest.status === 'completed')
+        throw new ServiceError('El pedido ya está completado.', 409);
+      const next: Campaign = {
+        ...current,
+        codexRequest: { ...current.codexRequest, status: 'cancelled' },
+        revision: current.revision + 1,
+        approvedRevision: null,
+        updatedAt: new Date().toISOString(),
+      };
+      this.state.campaigns[this.state.campaigns.findIndex((item) => item.id === id)] = next;
+      await this.persist();
+      return structuredClone(next);
+    });
+  }
+
+  async addCodexAsset(
+    input: { campaignId: string; requestId: string; variantId: string; slot: number; sha256: string },
+    createAsset: (request: CodexGenerationRequest) => Promise<{ asset: Asset; paths: AssetPaths }>,
+  ): Promise<{ campaign: Campaign; asset: Asset }> {
+    return this.withWrite(async () => {
+      this.assertCampaignEditable(input.campaignId);
+      const current = this.getCampaign(input.campaignId);
+      const request = current.codexRequest;
+      if (
+        !request ||
+        request.id !== input.requestId ||
+        request.status === 'cancelled' ||
+        request.contentHash !== codexContentHash(current)
+      )
+        throw new ServiceError('El pedido es obsoleto o está cancelado. Prepará uno vigente.', 409);
+      const target = request.targets.find(
+        (item) => item.variantId === input.variantId && item.slot === input.slot,
+      );
+      if (!target) throw new ServiceError('El destino no pertenece a este pedido.', 400);
+      this.assertCodexTarget(current, target);
+      if (target.assetId) {
+        if (target.sha256 !== input.sha256)
+          throw new ServiceError(
+            'Este destino ya recibió otra imagen. Prepará un nuevo pedido para reemplazarla.',
+            409,
+          );
+        return { campaign: current, asset: this.getAsset(target.assetId) };
+      }
+      const stored = await createAsset(structuredClone(request));
+      if (stored.asset.campaignId !== current.id || stored.asset.width * 5 !== stored.asset.height * 4)
+        throw new ServiceError('La imagen debe ser 4:5 y pertenecer a esta campaña.', 400);
+      target.assetId = stored.asset.id;
+      target.sha256 = input.sha256;
+      request.completed = request.targets.filter((item) => item.assetId).length;
+      request.status = request.completed === request.total ? 'completed' : 'partial';
+      this.state.campaigns[this.state.campaigns.findIndex((item) => item.id === current.id)] = current;
+      const result = await this.commitAsset(stored.asset, stored.paths, input);
+      if (!result.campaign) throw new ServiceError('Campaña no encontrada', 404);
+      return { campaign: result.campaign, asset: result.asset };
+    });
+  }
+
+  private assertCodexTarget(campaign: Campaign, target: CodexGenerationRequest['targets'][number]): void {
+    const variant = campaign.variants.find((item) => item.id === target.variantId);
+    if (!variant || variant.assetIds[target.slot] !== (target.assetId ?? target.originalAssetId))
+      throw new ServiceError(
+        'El destino cambió después de preparar el pedido. Cancelalo y prepará otro.',
+        409,
+      );
+  }
+
+  private assertNoPendingCodexRequest(campaign: Campaign): void {
+    if (pendingCodexRequest(campaign.codexRequest))
+      throw new ServiceError('Completá o cancelá el pedido de Codex antes de continuar.', 409);
+  }
+
+  private validateReference(input: Pick<Campaign, 'trendId' | 'referenceId'>): void {
+    if (!input.referenceId) return;
+    const trend = this.state.trends.find((item) => item.id === input.trendId);
+    if (trend?.visualStatus === 'context' || trend?.visualStatus === 'unavailable')
+      throw new ServiceError('Esta idea no tiene una referencia visual disponible para elegir.', 400);
+    if (!trend?.references.some((reference) => reference.id === input.referenceId))
+      throw new ServiceError('La referencia elegida no pertenece a esta idea.', 400);
   }
 
   async addAsset(
@@ -669,6 +842,13 @@ export class Store {
     const current = this.state.campaigns[index];
     if (!current) throw new ServiceError('Campaña no encontrada', 404);
     if (input.revision !== current.revision) throw new ServiceError('Conflicto de revisión', 409);
+    if (input.trendId !== current.trendId || input.referenceId !== current.referenceId)
+      this.validateReference(input);
+    if (pendingCodexRequest(current.codexRequest) && codexContentHash(input) !== codexContentHash(current))
+      throw new ServiceError(
+        'Cancelá el pedido pendiente antes de cambiar el brief o los textos de imagen.',
+        409,
+      );
     this.validateFinalAssets(input);
 
     const approvalChanged = changedApprovalInputs(current, input);
@@ -676,6 +856,7 @@ export class Store {
       ...structuredClone(input),
       id: current.id,
       createdAt: current.createdAt,
+      codexRequest: current.codexRequest,
       revision: current.revision + 1,
       updatedAt: new Date().toISOString(),
       approvedRevision: approvalChanged ? null : current.approvedRevision,
