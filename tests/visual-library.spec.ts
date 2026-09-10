@@ -148,8 +148,12 @@ test('visual references exclude reports, keep broken images honest and preserve 
   ).toBeDisabled();
   const enlarge = page.getByRole('button', { name: 'Ampliar referencia: Textura de gloss', exact: true });
   await enlarge.click();
-  await expect(page.getByRole('dialog', { name: 'Textura de gloss', exact: true })).toBeVisible();
+  const preview = page.getByRole('dialog', { name: 'Textura de gloss', exact: true });
+  await expect(preview).toBeVisible();
+  await expect(preview.getByRole('button', { name: 'Cerrar', exact: true })).toBeFocused();
   await page.keyboard.press('Escape');
+  await expect(preview).toBeHidden();
+  await expect(page.getByRole('dialog', { name: 'Gloss entre flores', exact: true })).toBeVisible();
   await expect(enlarge).toBeFocused();
   await page.getByRole('button', { name: 'Elegir referencia: Textura de gloss', exact: true }).click();
   await expect(

@@ -10,6 +10,8 @@ No se reprodujo el aviso original con los datos guardados: las fotos de los prod
 
 Comprobación de esta corrección: typecheck, Biome (78 archivos), 133 pruebas unitarias en 19 archivos, build, presupuesto (114,1 KiB gzip) y 22 pruebas de navegador aprobados. El servicio quedó reiniciado con el código actualizado. Se mantiene pendiente identificar el enlace del aviso original si vuelve a ocurrir.
 
+La primera ejecución de CI de esta corrección pasó 21 pruebas de navegador y falló al esperar el foco de retorno del visor. No se reprodujo en siete ejecuciones locales de esa prueba, tres con CPU limitada a 1/8. La prueba ahora verifica el foco dentro del visor antes de enviar Escape, su cierre y la permanencia del diálogo de la idea, además del retorno de foco original. Pasó tres repeticiones locales con esas comprobaciones; no se añadió una espera fija, reintentos ni se modificó el comportamiento del visor. El resultado remoto corresponde a la ejecución del commit final, consultable en GitHub Actions.
+
 ## Comprobaciones locales
 
 | Comprobación | Resultado observado |
