@@ -151,7 +151,7 @@ async function codexStudio(page: Page, initial?: 'partial' | 'completed') {
     const menu = page.getByRole('button', { name: 'Abrir navegación', exact: true });
     if (await menu.isVisible()) await menu.click();
     await page.getByRole('button', { name: 'Mis campañas', exact: true }).first().click();
-    await page.getByRole('button', { name: /CODEX STUDIO PRUEBA/ }).click();
+    await page.getByRole('button', { name: 'Abrir campaña CODEX STUDIO PRUEBA', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'CODEX STUDIO PRUEBA' })).toBeVisible();
   };
   await page.goto('/');

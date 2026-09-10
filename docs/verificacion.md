@@ -2,6 +2,18 @@
 
 Fecha: 9 de septiembre de 2026. Entorno real: Windows, PowerShell, Node 24.17.0, npm 11.13.0 y Chrome instalado. Revisión independiente de integración aprobada después de corregir todos los hallazgos importantes. Este informe describe la primera versión; no sustituye comprobaciones de futuras campañas.
 
+## Eliminar campañas — 10 de septiembre de 2026
+
+Mis campañas tiene acciones separadas para abrir y eliminar. La confirmación muestra el nombre completo, conserva los originales y explica que no elimina publicaciones en Meta. Cancelar recibe el foco inicial; el foco vuelve al botón o al encabezado cuando la tarjeta desaparece. Progreso y errores permanecen dentro del diálogo.
+
+La eliminación autentica y valida la revisión antes de mover el registro a la colección privada `deletedCampaigns`. Se conservaron assets, archivos y fingerprints de publicación; se rechazaron trabajos activos, publicaciones pendientes de reconciliar e importaciones tardías. Una respuesta perdida se consulta con GET sin repetir DELETE. Las nueve pruebas iniciales de eliminación fallaron antes de implementar la ruta y el método; luego pasaron, junto con la regresión de pedido parcial del chat.
+
+Verificación: typecheck, Biome (82 archivos), 147 pruebas en 20 archivos, build, 114,9 KiB gzip de JavaScript inicial frente a 220 KiB de presupuesto, y 32 E2E en Chrome aprobados. Los seis E2E nuevos cubren cancelación, persistencia y bytes originales, título largo en portugués a 390px, revisión obsoleta, envío único, respuesta perdida y error del servicio. Axe devolvió cero infracciones medidas A/AA en ambas confirmaciones; se revisaron las capturas de escritorio y móvil. Los selectores anteriores del estudio se actualizaron para distinguir Abrir de Eliminar.
+
+El detector Impeccable se ejecutó una vez sobre los archivos de UI modificados: 201 avisos de coherencia de diseño, todos informativos. Los colores de la acción destructiva y la escala de su título quedaron documentados en DESIGN.md; el informe no se presenta como un escaneo sin observaciones.
+
+El servicio real se reinició sin trabajos activos, con copia privada fechada del estado y registros. Se compararon las cuatro campañas y los 21 assets antes/después, sin cambios. En una sesión nueva de Chrome se verificaron cuatro botones Eliminar y se abrió/canceló una confirmación. No se eliminó ninguna campaña real ni se publicó contenido para probar esta función. La comprobación remota de CI corresponde al commit que incluya estos cambios; estos resultados son locales.
+
 ## Conexión de una pestaña nueva — 10 de septiembre de 2026
 
 Se reprodujo el botón Conectar sin respuesta: el campo obligatorio de código estaba dentro de un `details` cerrado y el enlace directo no aportaba la sesión. Las dos regresiones del servidor y las tres iniciales del navegador fallaron antes de implementar la corrección.

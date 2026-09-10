@@ -12,6 +12,9 @@ colors:
   border: "#E5DEED"
   sidebar: "#241632"
   nude: "#E8C7BC"
+  danger: "#9C304D"
+  danger-deep: "#7E223B"
+  danger-wash: "#FBF0F3"
 typography:
   body:
     fontFamily: "DM Sans, Segoe UI, sans-serif"
@@ -40,6 +43,8 @@ Un atelier digital de belleza que Bryan usa en su escritorio. El trabajo visual 
 ## Colors
 
 Canvas porcelana lila, navegación berenjena, acciones moradas, tipografía ciruela y blanco en controles activos. El contenido conserva sus colores, sin overlays que distorsionen cosméticos. Nude recuerda la identidad original de ElaBela.
+
+Eliminar usa carmín `#9C304D`, hover `#7E223B` y fondo suave `#FBF0F3`, reservados a esta acción. El texto y el icono identifican su función sin depender del color. La confirmación usa el diálogo existente, título de campaña a 18px/1.125rem y párrafos a 15px, con ajuste de línea para nombres largos.
 
 ## Typography
 

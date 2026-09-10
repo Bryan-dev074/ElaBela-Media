@@ -135,6 +135,21 @@ async function fixture() {
 }
 
 describe('pedidos locales de Codex Chat', () => {
+  it('cancels a pending request on campaign deletion and rejects late imports without changing originals', async () => {
+    const { root, store, prepare, upload } = await fixture();
+    const prepared = (await prepare()).campaign;
+    const imported = await upload(prepared);
+    const current = store.getCampaign(prepared.id);
+    const before = (await store.bootstrap()).assets;
+    await store.deleteCampaign(current.id, current.revision);
+    await expect(upload(current, undefined, 1)).rejects.toThrow(/no encontrada/);
+    expect((await store.bootstrap()).assets).toEqual(before);
+    expect(imported).toBeDefined();
+    const persisted = JSON.parse(await readFile(join(root, '.local/state.json'), 'utf8'));
+    expect(persisted.deletedCampaigns[0].campaign.codexRequest.status).toBe('cancelled');
+    expect(persisted.deletedCampaigns[0].campaign.codexRequest.completed).toBe(1);
+  });
+
   it.each(['es', 'pt'] as const)(
     'keeps all nine prompts anchored to the selected reference in %s',
     async (language) => {

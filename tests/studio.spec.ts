@@ -99,7 +99,7 @@ test('save inspiration, select PT copy, mix proposals, persist original quality 
   await page.screenshot({ path: '.local/studio-desktop.png', fullPage: true });
   await page.reload();
   await page.getByRole('button', { name: 'Mis campañas', exact: true }).click();
-  await page.getByRole('button', { name: /E2E — campaña de prueba/ }).click();
+  await page.getByRole('button', { name: 'Abrir campaña E2E — campaña de prueba', exact: true }).click();
   expect((await state()).campaigns[0]?.finalAssetIds).toEqual(composed?.finalAssetIds);
   await page.getByRole('button', { name: 'Ampliar pieza final 1', exact: true }).click();
   const downloadEvent = page.waitForEvent('download');

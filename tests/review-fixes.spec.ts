@@ -83,7 +83,7 @@ async function studioFixture(page: Page) {
   });
   const open = async () => {
     await page.getByRole('button', { name: 'Mis campañas', exact: true }).first().click();
-    await page.getByRole('button', { name: /REVIEW TEST/ }).click();
+    await page.getByRole('button', { name: 'Abrir campaña REVIEW TEST', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'REVIEW TEST' })).toBeVisible();
   };
   await page.goto('/');

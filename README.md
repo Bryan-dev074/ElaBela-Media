@@ -23,6 +23,8 @@ Requisitos: Windows, Node 24.17 o posterior de la rama 24, npm, y el publicador 
 
 Al crear imágenes quedan fijos el brief y los textos dentro de ellas. La descripción sigue editable hasta publicar. Para otra dirección creativa, creá otra campaña.
 
+En **Mis campañas**, **Eliminar** abre una confirmación con el nombre de la campaña. La quita de la lista y conserva los originales y el registro privado en esta PC; no borra publicaciones de Instagram/Facebook. Los pedidos pendientes del chat dejan de aceptar imágenes. Si hay un trabajo activo o una publicación por resolver, primero debe terminar o consultarse su estado. No hay restauración desde la interfaz.
+
 ## Configuración privada
 
 Copiá `.env.example` a `.env` únicamente si este último no existe. Nunca subas `.env`, la clave de emparejamiento ni archivos de `.secrets`.

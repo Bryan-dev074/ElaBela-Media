@@ -24,6 +24,7 @@ interface PersistedState {
   version: 1;
   trends: Trend[];
   campaigns: Campaign[];
+  deletedCampaigns: { campaign: Campaign; deletedAt: string }[];
   assets: Asset[];
   assetPaths: Record<string, AssetPaths>;
   jobs: Job[];
@@ -213,6 +214,36 @@ export class Store {
     return this.withWrite(() => this.commitCampaign(input));
   }
 
+  async deleteCampaign(id: string, revision: number): Promise<{ id: string; deleted: true }> {
+    return this.withWrite(async () => {
+      this.assertAcceptingWork();
+      const archived = this.state.deletedCampaigns.find((item) => item.campaign.id === id);
+      if (archived?.campaign.revision === revision) return { id, deleted: true };
+      const campaign = this.getCampaign(id);
+      if (campaign.revision !== revision)
+        throw new ServiceError(
+          'La campaña cambió. Cerrá esta confirmación, actualizá la página y revisala antes de eliminar.',
+          409,
+        );
+      if (this.state.jobs.some((job) => job.campaignId === id && ['queued', 'running'].includes(job.status)))
+        throw new ServiceError(
+          'La campaña tiene un trabajo activo. Esperá a que termine antes de eliminarla.',
+          409,
+        );
+      if (campaign.publication && ['publishing', 'partial', 'unknown'].includes(campaign.publication.status))
+        throw new ServiceError(
+          'Primero consultá el estado de la publicación en el estudio. Todavía hay un envío por resolver.',
+          409,
+        );
+      if (pendingCodexRequest(campaign.codexRequest) && campaign.codexRequest)
+        campaign.codexRequest.status = 'cancelled';
+      this.state.deletedCampaigns.push({ campaign, deletedAt: new Date().toISOString() });
+      this.state.campaigns = this.state.campaigns.filter((item) => item.id !== id);
+      await this.persist();
+      return { id, deleted: true };
+    });
+  }
+
   async claimPublication(id: string, revision: number, fingerprint: string, job: Job): Promise<Campaign> {
     return this.withWrite(async () => {
       this.assertCampaignEditable(id);
@@ -248,7 +279,7 @@ export class Store {
       )
         throw new ServiceError('Ya hay una publicación activa.', 409);
       if (
-        this.state.campaigns.some(
+        [...this.state.campaigns, ...this.state.deletedCampaigns.map((item) => item.campaign)].some(
           (item) => item.publication?.fingerprint === fingerprint && item.publication.status !== 'failed',
         )
       )
@@ -884,6 +915,7 @@ function emptyState(): PersistedState {
     version: 1,
     trends: [],
     campaigns: [],
+    deletedCampaigns: [],
     assets: [],
     assetPaths: {},
     jobs: [],

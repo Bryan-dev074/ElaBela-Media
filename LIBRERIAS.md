@@ -94,6 +94,10 @@ La búsqueda inicial admite resultados filtrados/paginados sin una tabla analít
 
 ## Criterios permanentes
 
+### Eliminación de campañas — revisión 2026-09-10
+
+Se reutilizan React, Radix Dialog (MIT), Lucide Trash2 (ISC), botones nativos y CSS del proyecto. Compatibles con el stack y sus estilos actuales; sin nuevas dependencias, licencias ni motores. La confirmación requiere foco protegido, Cancelar como entrada segura, retorno de foco, estado de espera y error anunciado. Se descartan otro paquete de confirmaciones y una biblioteca de estado: la API y el estado de React existentes resuelven la operación. Verificar teclado, móvil, axe y bundle; decisión de persistencia en ADR 0007.
+
 ### Conexión local — revisión 2026-09-10
 
 Se reutilizan React, Fetch, los campos semánticos y Radix Dialog. La validación nativa se aplica solo a los campos manuales abiertos; progreso y error permanecen visibles y accesibles dentro del diálogo. Se descarta añadir un gestor de formularios, autenticación o notificaciones: no resuelve una necesidad de este ajuste. Compatible con el stack actual, sin duplicar motores ni sumar licencias/dependencias; bundle, teclado y axe se comprueban con las herramientas existentes. La restricción de origen se documenta en ADR 0005.

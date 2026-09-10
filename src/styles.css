@@ -32,6 +32,8 @@
   --line: #e5deed;
   --wash: #eee7f7;
   --paper: #fff;
+  --danger: #9c304d;
+  --danger-deep: #7e223b;
   --radius: 14px;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
@@ -1199,6 +1201,7 @@ textarea {
   gap: 25px;
 }
 .campaign-card {
+  min-width: 0;
   text-align: left;
   background: white;
   border-radius: 12px;
@@ -1208,6 +1211,86 @@ textarea {
   transition:
     transform 0.2s,
     box-shadow 0.2s;
+}
+.campaign-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+.campaign-open:focus-visible {
+  outline-offset: -4px;
+}
+.campaign-info h2 {
+  overflow-wrap: anywhere;
+}
+.campaign-actions {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--line);
+  padding: 6px 14px;
+}
+.campaign-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--danger);
+  font-size: var(--text-body);
+  font-weight: 500;
+}
+.campaign-delete:hover {
+  background: #fbf0f3;
+  color: var(--danger-deep);
+}
+.button.danger {
+  background: var(--danger);
+  color: white;
+}
+.button.danger:hover {
+  background: var(--danger-deep);
+}
+.delete-campaign-summary {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding-block: 16px;
+  border-block: 1px solid var(--line);
+}
+.delete-campaign-summary > svg {
+  flex-shrink: 0;
+  color: var(--danger);
+}
+.delete-campaign-summary strong {
+  display: block;
+  font-size: 1.125rem;
+  overflow-wrap: anywhere;
+}
+.delete-campaign-summary span {
+  display: block;
+  margin-top: 8px;
+  font-size: var(--text-body);
+  color: var(--muted);
+}
+.delete-campaign-details {
+  color: var(--muted);
+  font-size: var(--text-lead);
+  line-height: 1.7;
+}
+.delete-campaign-details p {
+  margin-top: 16px;
+}
+.delete-campaign-error {
+  margin-top: 18px;
+  color: var(--danger-deep);
+  font-size: var(--text-lead);
+  line-height: 1.6;
 }
 .campaign-card:hover {
   transform: translateY(-3px);
@@ -1247,7 +1330,7 @@ textarea {
   align-items: center;
   margin-top: 22px;
   font-size: var(--text-xs);
-  color: #8a709b;
+  color: var(--muted);
 }
 .studio-breadcrumb {
   display: flex;

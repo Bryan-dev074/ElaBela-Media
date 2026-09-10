@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { Download, Image as ImageIcon, X, ZoomIn, ZoomOut } from 'lucide-react';
-import type { ReactNode } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useState } from 'react';
 import type { Asset, Reference } from '../../shared/types';
 import { downloadAsset, useAsset, useAssetState } from '../api';
@@ -13,6 +13,9 @@ export function Modal({
   children,
   wide = false,
   returnFocusTo,
+  fallbackFocusTo,
+  initialFocusRef,
+  dismissible = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -21,28 +24,38 @@ export function Modal({
   children: ReactNode;
   wide?: boolean;
   returnFocusTo?: HTMLElement | null;
+  fallbackFocusTo?: HTMLElement | null;
+  initialFocusRef?: RefObject<HTMLElement | null>;
+  dismissible?: boolean;
 }) {
   return (
     <Dialog.Root
       open={open}
       onOpenChange={(value) => {
-        if (!value) onClose();
+        if (!value && dismissible) onClose();
       }}
     >
       <Dialog.Portal>
         <Dialog.Overlay className="modal-overlay" />
         <Dialog.Content
           className={`modal ${wide ? 'modal-wide' : ''}`}
-          onCloseAutoFocus={(event) => {
-            if (returnFocusTo?.isConnected && !returnFocusTo.matches(':disabled')) {
+          onOpenAutoFocus={(event) => {
+            if (initialFocusRef?.current) {
               event.preventDefault();
-              returnFocusTo.focus();
+              initialFocusRef.current.focus();
+            }
+          }}
+          onCloseAutoFocus={(event) => {
+            const target = returnFocusTo?.isConnected ? returnFocusTo : fallbackFocusTo;
+            if (target?.isConnected && !target.matches(':disabled')) {
+              event.preventDefault();
+              target.focus();
             }
           }}
         >
           <div className="modal-heading">
             <Dialog.Title>{title}</Dialog.Title>
-            <Dialog.Close className="icon-button" aria-label="Cerrar">
+            <Dialog.Close className="icon-button" aria-label="Cerrar" disabled={!dismissible}>
               <X size={20} />
             </Dialog.Close>
           </div>

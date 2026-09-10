@@ -272,6 +272,12 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<LocalApp>
     return reply.status(201).send(campaign);
   });
 
+  app.delete('/api/campaigns/:id', async (request) => {
+    const { id } = z.object({ id: z.string().min(1).max(120) }).parse(request.params);
+    const { revision } = z.object({ revision: z.number().int().nonnegative() }).strict().parse(request.body);
+    return store.deleteCampaign(id, revision);
+  });
+
   app.put('/api/campaigns/:id', async (request) => {
     const { id } = z.object({ id: z.string().min(1).max(120) }).parse(request.params);
     const submitted = campaignSchema.parse(request.body) as Campaign;

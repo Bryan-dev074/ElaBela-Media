@@ -14,12 +14,14 @@ import {
   Radio,
   Settings2,
   Sparkles,
+  Trash2,
   X,
 } from 'lucide-react';
 import { domAnimation, LazyMotion, m, useReducedMotion } from 'motion/react';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { Bootstrap, Campaign, CreateCampaign, Trend } from '../shared/types';
 import { connection, connectLocal, isLocalPage, post, request, setConnection } from './api';
+import { DeleteCampaignDialog } from './components/DeleteCampaignDialog';
 import { Products } from './components/Products';
 import { Radar } from './components/Radar';
 import { AssetImage, Empty, GitHubMark, Modal, ReferenceImage } from './components/ui';
@@ -45,6 +47,8 @@ export default function App() {
   const [data, setData] = useState<Bootstrap>();
   const [page, setPage] = useState<Page>('radar');
   const [campaignId, setCampaignId] = useState<string>();
+  const [deleting, setDeleting] = useState<{ campaign: Campaign; trigger: HTMLElement }>();
+  const campaignsHeading = useRef<HTMLHeadingElement>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ message: string; error: boolean }>();
@@ -388,7 +392,9 @@ export default function App() {
                     <div className="page-intro">
                       <div>
                         <div className="eyebrow">De idea a publicación</div>
-                        <h1>Tus campañas, tomando forma.</h1>
+                        <h1 ref={campaignsHeading} tabIndex={-1}>
+                          Tus campañas, tomando forma.
+                        </h1>
                         <p>Cada propuesta y cada versión, en su lugar.</p>
                       </div>
                       <button className="button" type="button" onClick={() => navigate('radar')}>
@@ -404,43 +410,59 @@ export default function App() {
                             item.finalAssetIds[0] ||
                             item.variants.flatMap((variant) => variant.assetIds).find(Boolean);
                           return (
-                            <button
-                              type="button"
-                              className="campaign-card"
-                              key={item.id}
-                              onClick={() => openCampaign(item)}
-                            >
-                              <div className="campaign-cover">
-                                {cover ? (
-                                  <AssetImage id={cover} alt={item.title} />
-                                ) : (
-                                  <ReferenceImage
-                                    reference={trend?.references.find(
-                                      (reference) => reference.id === item.referenceId,
-                                    )}
-                                    alt={`Referencia para ${item.title}`}
-                                  />
-                                )}
-                                <span className="tag">
-                                  {item.publication?.status === 'verified'
-                                    ? 'Publicada'
-                                    : item.finalAssetIds.length === item.slideCount
-                                      ? 'En revisión'
-                                      : 'En creación'}
-                                </span>
+                            <article className="campaign-card" key={item.id}>
+                              <button
+                                type="button"
+                                className="campaign-open"
+                                aria-label={`Abrir campaña ${item.title}`}
+                                onClick={() => openCampaign(item)}
+                              >
+                                <div className="campaign-cover">
+                                  {cover ? (
+                                    <AssetImage id={cover} alt={item.title} />
+                                  ) : (
+                                    <ReferenceImage
+                                      reference={trend?.references.find(
+                                        (reference) => reference.id === item.referenceId,
+                                      )}
+                                      alt={`Referencia para ${item.title}`}
+                                    />
+                                  )}
+                                  <span className="tag">
+                                    {item.publication?.status === 'verified'
+                                      ? 'Publicada'
+                                      : item.finalAssetIds.length === item.slideCount
+                                        ? 'En revisión'
+                                        : 'En creación'}
+                                  </span>
+                                </div>
+                                <div className="campaign-info">
+                                  <h2>{item.title}</h2>
+                                  <p>
+                                    {item.slideCount} {item.slideCount === 1 ? 'pieza' : 'piezas'} ·{' '}
+                                    {item.variantCount} {item.variantCount === 1 ? 'propuesta' : 'propuestas'}{' '}
+                                    · {item.language === 'es' ? 'Español' : 'Português'}
+                                  </p>
+                                  <span>
+                                    Actualizada el {new Date(item.updatedAt).toLocaleDateString('es-PY')}
+                                    <ArrowRight size={17} />
+                                  </span>
+                                </div>
+                              </button>
+                              <div className="campaign-actions">
+                                <button
+                                  type="button"
+                                  className="campaign-delete"
+                                  aria-label={`Eliminar campaña ${item.title}`}
+                                  onClick={(event) =>
+                                    setDeleting({ campaign: item, trigger: event.currentTarget })
+                                  }
+                                >
+                                  <Trash2 size={16} aria-hidden="true" />
+                                  Eliminar
+                                </button>
                               </div>
-                              <div className="campaign-info">
-                                <h2>{item.title}</h2>
-                                <p>
-                                  {item.slideCount} piezas · {item.variantCount} propuestas ·{' '}
-                                  {item.language === 'es' ? 'Español' : 'Português'}
-                                </p>
-                                <span>
-                                  Actualizada el {new Date(item.updatedAt).toLocaleDateString('es-PY')}
-                                  <ArrowRight size={17} />
-                                </span>
-                              </div>
-                            </button>
+                            </article>
                           );
                         })}
                       </div>
@@ -516,6 +538,29 @@ export default function App() {
           </footer>
         </div>
       </div>
+      {deleting && (
+        <DeleteCampaignDialog
+          key={deleting.campaign.id}
+          campaign={deleting.campaign}
+          trigger={deleting.trigger}
+          fallbackFocusTo={campaignsHeading.current}
+          onClose={() => setDeleting(undefined)}
+          onSync={setData}
+          onDeleted={(id) => {
+            setData(
+              (current) =>
+                current && { ...current, campaigns: current.campaigns.filter((item) => item.id !== id) },
+            );
+            if (campaignId === id) setCampaignId(undefined);
+            sessionStorage.removeItem(`elabela-copy-draft:${id}`);
+            setDeleting(undefined);
+            setToast({
+              message: 'Campaña eliminada. Los originales siguen guardados en tu PC.',
+              error: false,
+            });
+          }}
+        />
+      )}
       <Modal
         open={connectOpen}
         onClose={() => setConnectOpen(false)}
