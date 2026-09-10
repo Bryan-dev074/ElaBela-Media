@@ -155,6 +155,9 @@ test('visual references exclude reports, keep broken images honest and preserve 
   await expect(preview).toBeHidden();
   await expect(page.getByRole('dialog', { name: 'Gloss entre flores', exact: true })).toBeVisible();
   await expect(enlarge).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: 'Gloss entre flores', exact: true })).toBeHidden();
+  await page.getByRole('button', { name: 'Ver idea: Gloss entre flores', exact: true }).click();
   await page.getByRole('button', { name: 'Elegir referencia: Textura de gloss', exact: true }).click();
   await expect(
     page.getByRole('button', { name: 'Elegir referencia: Textura de gloss', exact: true }),

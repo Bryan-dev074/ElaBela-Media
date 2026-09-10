@@ -336,7 +336,10 @@ export function Radar({
       </div>
       <Modal
         open={!!selected}
-        onClose={() => setDetail(undefined)}
+        onClose={() => {
+          if (previewReference) setPreviewReference(undefined);
+          else setDetail(undefined);
+        }}
         title={selected?.title || 'Idea'}
         description={selected?.summary}
         wide
