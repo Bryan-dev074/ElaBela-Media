@@ -15,15 +15,15 @@ export function assertRemoteUrl(value: string): URL {
   } catch {
     throw new ServiceError('La fuente no tiene una URL válida', 400);
   }
-  if (
-    url.protocol !== 'https:' ||
-    url.username ||
-    url.password ||
-    (url.port && url.port !== '443') ||
-    !remoteHosts.has(url.hostname)
-  ) {
-    throw new ServiceError('Este dominio de referencia requiere importación manual', 400);
-  }
+  if (url.protocol !== 'https:')
+    throw new ServiceError('La descarga necesita un enlace HTTPS. Revisá la dirección de la imagen.', 400);
+  if (url.username || url.password || (url.port && url.port !== '443'))
+    throw new ServiceError('Usá un enlace HTTPS sin credenciales ni un puerto personalizado.', 400);
+  if (!remoteHosts.has(url.hostname))
+    throw new ServiceError(
+      `No está habilitada la descarga desde ${url.hostname}. Compartí la fuente en el chat para revisar ese dominio.`,
+      400,
+    );
   return url;
 }
 export type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
@@ -48,7 +48,10 @@ export async function downloadPublic(
       continue;
     }
     if (!response.ok || !response.body)
-      throw new ServiceError('La fuente no está disponible. Revisá la referencia.', 502);
+      throw new ServiceError(
+        `No se pudo descargar desde ${url.hostname} (HTTP ${response.status}). Abrí la fuente original para comprobar su disponibilidad.`,
+        502,
+      );
     const advertised = Number(response.headers.get('content-length'));
     if (advertised > limit) {
       await response.body.cancel();

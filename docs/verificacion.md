@@ -2,6 +2,14 @@
 
 Fecha: 9 de septiembre de 2026. Entorno real: Windows, PowerShell, Node 24.17.0, npm 11.13.0 y Chrome instalado. Revisión independiente de integración aprobada después de corregir todos los hallazgos importantes. Este informe describe la primera versión; no sustituye comprobaciones de futuras campañas.
 
+## Diagnóstico de descargas — 10 de septiembre de 2026
+
+El aviso «Este dominio de referencia requiere importación manual» agrupaba causas distintas sin identificar fuente. Se separaron HTTPS, credenciales/puerto, dominio no habilitado y estado HTTP. Preparar un pedido identifica el producto o referencia que falla y no expone consultas privadas ni errores internos del sistema. Las cuatro regresiones fallaron antes de corregirlo y pasaron después; se mantiene la lista de fuentes revisadas y la validación de redirecciones.
+
+No se reprodujo el aviso original con los datos guardados: las fotos de los productos 9072, 13451, 13147 y 13154 descargaron correctamente. En una copia aislada, ambas campañas prepararon sus nueve destinos con fuentes reales; sus campañas originales permanecieron iguales. No se generaron imágenes ni se publicó contenido. El servicio estaba detenido al iniciar el diagnóstico y se volvió a iniciar. No se habilitó un dominio nuevo sin evidencia del enlace que falló.
+
+Comprobación de esta corrección: typecheck, Biome (78 archivos), 133 pruebas unitarias en 19 archivos, build, presupuesto (114,1 KiB gzip) y 22 pruebas de navegador aprobados. El servicio quedó reiniciado con el código actualizado. Se mantiene pendiente identificar el enlace del aviso original si vuelve a ocurrir.
+
 ## Comprobaciones locales
 
 | Comprobación | Resultado observado |

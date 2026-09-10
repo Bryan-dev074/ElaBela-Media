@@ -7,10 +7,25 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Campaign, Product, Trend } from '../shared/types.js';
 import { buildApp } from './app.js';
 import { createCodexGeneration, importCodexAsset } from './codex-generation.js';
+import { ServiceError } from './contracts.js';
 import { storeCampaignImage } from './media.js';
 import { Store } from './store.js';
 
 const roots: string[] = [];
+
+it('identifies the failed product without persisting a misleading request', async () => {
+  const { store, campaign } = await fixture();
+  const before = store.getCampaign(campaign.id);
+  const generate = createCodexGeneration({
+    productReference: async () => {
+      throw new ServiceError('No está habilitada la descarga desde images.example.test.', 400);
+    },
+  }).generate;
+  await expect(
+    required(generate)({ campaign: before, payload: { revision: before.revision }, store }),
+  ).rejects.toThrow(/Gloss de PRUEBA.*images\.example\.test/s);
+  expect(store.getCampaign(campaign.id)).toEqual(before);
+});
 function required<T>(value: T | null | undefined): T {
   if (value === undefined || value === null) throw new Error('Falta un dato esperado de la prueba');
   return value;

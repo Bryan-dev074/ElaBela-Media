@@ -6,11 +6,33 @@ describe('descargas públicas permitidas', () => {
     expect(assertRemoteUrl('https://images.ctfassets.net/reference.webp').hostname).toBe(
       'images.ctfassets.net',
     );
-    expect(() => assertRemoteUrl('http://images.ctfassets.net/reference.webp')).toThrow(/dominio/i);
+    expect(() => assertRemoteUrl('http://images.ctfassets.net/reference.webp')).toThrow(/HTTPS/i);
     expect(() => assertRemoteUrl('https://evil.images.ctfassets.net/reference.webp')).toThrow(/dominio/i);
     expect(() => assertRemoteUrl('https://images.ctfassets.net.evil.test/reference.webp')).toThrow(
       /dominio/i,
     );
+  });
+
+  it('identifica el dominio rechazado sin mostrar credenciales ni parámetros privados', () => {
+    expect(() => assertRemoteUrl('https://images.example.test/photo.jpg?token=PRIVATE')).toThrow(
+      /images\.example\.test.*chat/i,
+    );
+    expect(() => assertRemoteUrl('https://user:PRIVATE@images.example.test/photo.jpg?token=PRIVATE')).toThrow(
+      /credenciales/i,
+    );
+    try {
+      assertRemoteUrl('https://user:PRIVATE@images.example.test/photo.jpg?token=PRIVATE');
+    } catch (error) {
+      expect((error as Error).message).not.toContain('PRIVATE');
+      expect((error as Error).message).toMatch(/credenciales/i);
+    }
+  });
+
+  it('identifica una fuente no disponible y su respuesta HTTP', async () => {
+    const fetcher = vi.fn<FetchLike>(async () => new Response(null, { status: 403 }));
+    await expect(
+      downloadPublic('https://i.pinimg.com/photo.jpg?token=PRIVATE', 1000, fetcher),
+    ).rejects.toThrow(/i\.pinimg\.com.*HTTP 403/);
   });
 
   it('rechaza una redirección hacia un host no autorizado sin solicitarlo', async () => {

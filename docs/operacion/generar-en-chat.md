@@ -18,3 +18,9 @@ El servicio debe estar abierto. El importador usa el emparejamiento privado, val
 Un pedido pendiente no es un trabajo ejecutándose: la biblioteca y la descripción siguen disponibles. Cancelarlo invalida futuras importaciones y conserva las imágenes ya recibidas; no interrumpe el chat. La app muestra avance por destino. Después, Bryan mezcla/ordena el carrusel, revisa los originales y confirma antes de publicar.
 
 Los archivos quedan en `contenido/AAAA/MM/CAMPANA/pedidos-codex/PEDIDO/` y las carpetas de originales/previews de la campaña. No subir estos archivos privados a GitHub. La descripción puede editarse sin invalidar las imágenes; no se aprueba automáticamente para publicar.
+
+## Si falla una fuente al preparar el pedido
+
+El aviso identifica el producto o referencia que falló. Distingue un enlace sin HTTPS, credenciales/puerto no compatibles, dominio no habilitado y respuesta HTTP de una fuente no disponible. Muestra el dominio, sin incluir parámetros privados del enlace. No ofrece una importación manual inexistente como única salida.
+
+Para un dominio nuevo, compartir la fuente en este chat permite comprobar el enlace y su procedencia antes de habilitarlo o incorporar la imagen localmente. Un HTTP 403/404 requiere revisar la disponibilidad de esa fuente; añadir un dominio no resuelve por sí solo ese rechazo. Un pedido que falla no se registra como preparado y conserva la campaña para volver a intentarlo.

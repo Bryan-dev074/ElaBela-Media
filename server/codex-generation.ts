@@ -59,7 +59,9 @@ async function prepareFiles(
   const products = campaign.productIds.map((productId) => store.getProduct(productId));
   const sources = [];
   for (const [index, product] of products.entries()) {
-    const buffer = await (options.productReference ?? getProductReference)(product);
+    const buffer = await loadSource(`Foto del producto «${product.name}»`, () =>
+      (options.productReference ?? getProductReference)(product),
+    );
     sources.push({
       id: product.id,
       name: product.name,
@@ -78,9 +80,11 @@ async function prepareFiles(
   if (campaign.referenceId) {
     const reference = trend?.references.find((item) => item.id === campaign.referenceId);
     if (!reference) throw new ServiceError('La referencia elegida ya no está disponible.', 409);
-    const buffer = reference.assetId
-      ? await readBoundedImage(await store.getAssetPath(reference.assetId))
-      : await (options.referenceDownloader ?? downloadPublic)(reference.url);
+    const buffer = await loadSource(`Referencia «${reference.title}»`, async () =>
+      reference.assetId
+        ? readBoundedImage(await store.getAssetPath(reference.assetId))
+        : (options.referenceDownloader ?? downloadPublic)(reference.url),
+    );
     references.push({
       id: reference.id,
       title: reference.title,
@@ -223,6 +227,18 @@ async function readBoundedImage(path: string): Promise<Buffer> {
   if ((await stat(path)).size > MAX_SOURCE_BYTES)
     throw new ServiceError('La fuente supera el límite de 20 MB', 413);
   return readFile(path);
+}
+
+async function loadSource(label: string, load: () => Promise<Buffer>): Promise<Buffer> {
+  try {
+    return await load();
+  } catch (error) {
+    if (error instanceof ServiceError) throw new ServiceError(`${label}: ${error.message}`, error.statusCode);
+    throw new ServiceError(
+      `${label}: no se pudo cargar la imagen. Revisá la fuente y volvé a preparar el pedido.`,
+      502,
+    );
+  }
 }
 
 async function persistSource(directory: string, name: string, buffer: Buffer) {
