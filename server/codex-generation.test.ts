@@ -135,6 +135,48 @@ async function fixture() {
 }
 
 describe('pedidos locales de Codex Chat', () => {
+  it.each(['es', 'pt'] as const)(
+    'keeps all nine prompts anchored to the selected reference in %s',
+    async (language) => {
+      const { root, store, campaign, prepare } = await fixture();
+      await store.upsertTrend({
+        ...required((await store.bootstrap()).trends.find((item) => item.id === trend.id)),
+        rationale: 'Usar el serum L’Oreal y una paleta beige ajena a la imagen elegida.',
+      });
+      const current = await store.saveCampaignEditable({
+        ...campaign,
+        language,
+        slideCount: 3,
+        copyOptions: campaign.copyOptions.map((copy) => ({
+          ...copy,
+          slides: Array.from({ length: 3 }, () => required(copy.slides[0])),
+        })),
+        variants: campaign.variants.map((variant) => ({ ...variant, assetIds: [null, null, null] })),
+      });
+      const result = await prepare(current);
+      const request = required(result.campaign.codexRequest);
+      const manifest = JSON.parse(await readFile(join(root, request.manifestPath), 'utf8'));
+      expect(manifest.requests).toHaveLength(9);
+      for (const item of manifest.requests) {
+        expect(item.prompt).toContain('selected reference is the visual blueprint');
+        expect(item.prompt).toContain('Preserve its recognizable composition');
+        expect(item.prompt).toContain(
+          'Derive the palette, textures and materials from the selected product photos',
+        );
+        expect(item.prompt).not.toContain('Preserve its recognizable composition, dominant palette');
+        expect(item.prompt).toContain('Do not transfer ingredients, benefits or claims');
+        expect(item.prompt).toContain('Compare the result side by side');
+        expect(item.prompt).toContain('"referenceId":"ref2"');
+        expect(item.prompt).not.toMatch(
+          /porcelain surfaces|Editorial:|Expressive:|Bold:|L’Oreal|mood references/,
+        );
+      }
+      expect(await readFile(join(root, request.briefPath), 'utf8')).toContain(
+        'Recrear la referencia elegida con los productos seleccionados',
+      );
+    },
+  );
+
   it('defaults to chat even with an API key and prepares immutable sources for the chosen second reference', async () => {
     vi.stubEnv('OPENAI_API_KEY', 'not-a-real-key');
     vi.stubEnv('ELABELA_GENERATION_PROVIDER', '');
