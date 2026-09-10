@@ -6,6 +6,8 @@ Estudio de marketing de ElaBela: referencias con fuentes, productos reales, text
 
 Doble clic en **`Iniciar ElaBela Media.cmd`**. Abre la página y deja el servicio local en segundo plano. Para terminar, ejecutá **`Detener ElaBela Media.cmd`** cuando no haya trabajos activos. No se instala un servicio permanente de Windows.
 
+Con el servicio abierto, también podés entrar directamente a **http://127.0.0.1:4317/**: la pestaña local se conecta automáticamente, incluso sin el enlace del iniciador. Si necesitás reintentar, **Conectar** muestra el progreso y cualquier error dentro del diálogo; no hace falta completar la conexión manual para esta página.
+
 El servicio es un programa de este proyecto que guarda archivos y habla con el generador y Meta. Escucha solamente en `127.0.0.1:4317`. La PC debe permanecer encendida para generar o publicar; cerrar el navegador no detiene un trabajo ya iniciado. Si se detiene el programa, los trabajos interrumpidos se conservan y no se reenvían automáticamente.
 
 Requisitos: Windows, Node 24.17 o posterior de la rama 24, npm, y el publicador existente en `D:\ElaBela\MetaBusiness`. En esta PC las dependencias locales y los logos ya están preparados. Una clonación nueva necesita `npm ci --ignore-scripts`, su logo y una captura del catálogo.

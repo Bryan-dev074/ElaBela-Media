@@ -161,6 +161,65 @@ describe('servicio local', () => {
     expect(settings.json().allowedOrigins).toContain('http://127.0.0.1:4317');
   });
 
+  it('pairs only the same-origin local page and does not cache its session capability', async () => {
+    await app.close();
+    app = await buildApp({ root, token: TOKEN, allowedOrigins: ['http://127.0.0.1:4317'] });
+    const paired = await app.inject({
+      method: 'POST',
+      url: '/api/local-connection',
+      headers: {
+        host: '127.0.0.1:4317',
+        origin: 'http://127.0.0.1:4317',
+        'sec-fetch-site': 'same-origin',
+        'x-elabela-connect': 'local',
+      },
+    });
+    expect(paired.statusCode).toBe(200);
+    expect(paired.json()).toEqual({ token: TOKEN });
+    expect(paired.headers['cache-control']).toBe('no-store');
+    const connected = await app.inject({
+      url: '/api/bootstrap',
+      headers: { host: '127.0.0.1:4317', authorization: `Bearer ${paired.json().token}` },
+    });
+    expect(connected.statusCode).toBe(200);
+  });
+
+  it('does not share local pairing with other origins, navigation or unmarked requests', async () => {
+    await app.close();
+    app = await buildApp({
+      root,
+      token: TOKEN,
+      allowedOrigins: ['http://127.0.0.1:4317', ORIGIN, 'https://studio.example'],
+    });
+    const headers = {
+      host: '127.0.0.1:4317',
+      origin: 'http://127.0.0.1:4317',
+      'sec-fetch-site': 'same-origin',
+      'x-elabela-connect': 'local',
+    };
+    for (const extra of [
+      { origin: 'https://studio.example' },
+      { origin: ORIGIN },
+      { origin: '' },
+      { 'sec-fetch-site': 'cross-site' },
+      { 'sec-fetch-site': 'same-site' },
+      { 'sec-fetch-site': '' },
+      { 'x-elabela-connect': '' },
+      { host: 'evil.example:4317' },
+    ]) {
+      const denied = await app.inject({
+        method: 'POST',
+        url: '/api/local-connection',
+        headers: { ...headers, ...extra },
+      });
+      expect(denied.statusCode).toBe(403);
+      expect(denied.body).not.toContain(TOKEN);
+    }
+    const navigation = await app.inject({ method: 'GET', url: '/api/local-connection', headers });
+    expect(navigation.statusCode).toBe(403);
+    expect(navigation.body).not.toContain(TOKEN);
+  });
+
   it('persiste tendencias importadas y conserva el estado guardado al reimportarlas', async () => {
     const trend = sampleTrend({ saved: true, publishedAt: '2026-05-26' });
     const imported = await app.inject({

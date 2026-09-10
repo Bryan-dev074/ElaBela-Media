@@ -1,6 +1,6 @@
 # LIBRERÍAS — catálogo de ElaBela Media
 
-Consultar completo antes de UI, animaciones o efectos. Última revisión: 2026-09-09. Estructura adaptada del Anexo A de STACK-AGENTE.
+Consultar completo antes de UI, animaciones o efectos. Última revisión: 2026-09-10. Estructura adaptada del Anexo A de STACK-AGENTE.
 
 ## Contexto de este proyecto
 
@@ -93,6 +93,10 @@ La búsqueda inicial admite resultados filtrados/paginados sin una tabla analít
 | [TanStack](https://tanstack.com/) | Datos | Query y Table diferidas |
 
 ## Criterios permanentes
+
+### Conexión local — revisión 2026-09-10
+
+Se reutilizan React, Fetch, los campos semánticos y Radix Dialog. La validación nativa se aplica solo a los campos manuales abiertos; progreso y error permanecen visibles y accesibles dentro del diálogo. Se descarta añadir un gestor de formularios, autenticación o notificaciones: no resuelve una necesidad de este ajuste. Compatible con el stack actual, sin duplicar motores ni sumar licencias/dependencias; bundle, teclado y axe se comprueban con las herramientas existentes. La restricción de origen se documenta en ADR 0005.
 
 ### Referencias visuales y pedido del chat — revisión 2026-09-09
 

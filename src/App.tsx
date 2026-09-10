@@ -19,7 +19,7 @@ import {
 import { domAnimation, LazyMotion, m, useReducedMotion } from 'motion/react';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { Bootstrap, Campaign, CreateCampaign, Trend } from '../shared/types';
-import { connection, post, request, setConnection } from './api';
+import { connection, connectLocal, isLocalPage, post, request, setConnection } from './api';
 import { Products } from './components/Products';
 import { Radar } from './components/Radar';
 import { AssetImage, Empty, GitHubMark, Modal, ReferenceImage } from './components/ui';
@@ -123,12 +123,17 @@ export default function App() {
   }, [motionPaused]);
   const reportError = useCallback((message: string) => setToast({ message, error: true }), []);
   const refresh = useCallback(async () => {
-    const next = await request<Bootstrap>('/api/bootstrap');
+    const next = await request<Bootstrap>('/api/bootstrap', { signal: AbortSignal.timeout(8000) });
     setData(next);
     return next;
   }, []);
   useEffect(() => {
     void refresh()
+      .catch(async (error: unknown) => {
+        if (!isLocalPage()) throw error;
+        await connectLocal();
+        return refresh();
+      })
       .catch(() => setData(undefined))
       .finally(() => setLoading(false));
   }, [refresh]);
@@ -524,7 +529,6 @@ export default function App() {
             setConnectOpen(false);
             setToast({ message: 'Tu estudio está conectado.', error: false });
           }}
-          onError={reportError}
         />
       </Modal>
       <Modal
@@ -572,26 +576,33 @@ export default function App() {
   );
 }
 
-function ConnectionForm({
-  onConnect,
-  onError,
-}: {
-  onConnect: (base: string, token: string) => Promise<void>;
-  onError: (message: string) => void;
-}) {
+function ConnectionForm({ onConnect }: { onConnect: (base: string, token: string) => Promise<void> }) {
   const [base, setBase] = useState(
     connection().base ||
       (['localhost', '127.0.0.1'].includes(location.hostname) ? '' : 'http://127.0.0.1:4317'),
   );
   const [token, setToken] = useState(connection().token);
   const [busy, setBusy] = useState(false);
+  const [manual, setManual] = useState(!isLocalPage());
+  const [errorMessage, setErrorMessage] = useState('');
   return (
     <form
       onSubmit={(event) => {
         event.preventDefault();
+        if (busy) return;
+        setErrorMessage('');
         setBusy(true);
-        void onConnect(base, token)
-          .catch((error) => onError((error as Error).message))
+        const connect = async () => {
+          if (!manual) {
+            await connectLocal();
+            const local = connection();
+            await onConnect(local.base, local.token);
+          } else {
+            await onConnect(base, token);
+          }
+        };
+        void connect()
+          .catch((error) => setErrorMessage((error as Error).message))
           .finally(() => setBusy(false));
       }}
     >
@@ -607,12 +618,13 @@ function ConnectionForm({
           <strong>3.</strong> Permití el acceso a la red local si el navegador lo solicita.
         </p>
       </div>
-      <details>
+      <details open={manual} onToggle={(event) => setManual(event.currentTarget.open)}>
         <summary>Conexión manual</summary>
         <label className="field">
           Dirección del servicio
           <input
             value={base}
+            disabled={!manual || busy}
             onChange={(event) => setBase(event.target.value)}
             placeholder="Vacío para la página local"
           />
@@ -621,10 +633,11 @@ function ConnectionForm({
           Código de conexión
           <input
             type="password"
+            disabled={!manual || busy}
             value={token}
             onChange={(event) => setToken(event.target.value)}
             autoComplete="off"
-            required
+            required={manual}
           />
         </label>
         <p className="help-text">
@@ -632,9 +645,15 @@ function ConnectionForm({
           local.
         </p>
       </details>
+      {errorMessage && (
+        <p className="inline-notice" role="alert">
+          {errorMessage}
+        </p>
+      )}
       <div className="modal-actions">
         <button className="button" type="submit" disabled={busy}>
-          {busy ? <LoaderCircle className="spin" size={17} /> : <Monitor size={17} />}Conectar
+          {busy ? <LoaderCircle className="spin" size={17} /> : <Monitor size={17} />}
+          {busy ? 'Conectando…' : 'Conectar'}
         </button>
       </div>
     </form>

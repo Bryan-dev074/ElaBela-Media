@@ -22,6 +22,33 @@ export function setConnection(base: string, token: string) {
   localStorage.setItem('elabela-service', clean);
   sessionStorage.setItem('elabela-session', token.trim());
 }
+export function isLocalPage() {
+  return (
+    window.location.protocol === 'http:' &&
+    ['127.0.0.1', 'localhost', '[::1]'].includes(window.location.hostname)
+  );
+}
+export async function connectLocal() {
+  if (!isLocalPage()) throw new Error('Usá el enlace de conexión que abre el iniciador de esta PC.');
+  const response = await fetch('/api/local-connection', {
+    method: 'POST',
+    headers: { 'x-elabela-connect': 'local' },
+    cache: 'no-store',
+    redirect: 'error',
+    signal: AbortSignal.timeout(8000),
+  }).catch(() => {
+    throw new Error(
+      'No se pudo conectar con el servicio local. Abrí Iniciar ElaBela Media y volvé a intentar.',
+    );
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || typeof data.token !== 'string' || !data.token) {
+    throw new Error(
+      typeof data.error === 'string' ? data.error : 'Abrí Iniciar ElaBela Media para conectar esta página.',
+    );
+  }
+  setConnection('', data.token);
+}
 export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const { base, token } = connection();
   const headers = new Headers(options.headers);

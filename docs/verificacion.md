@@ -2,6 +2,16 @@
 
 Fecha: 9 de septiembre de 2026. Entorno real: Windows, PowerShell, Node 24.17.0, npm 11.13.0 y Chrome instalado. Revisión independiente de integración aprobada después de corregir todos los hallazgos importantes. Este informe describe la primera versión; no sustituye comprobaciones de futuras campañas.
 
+## Conexión de una pestaña nueva — 10 de septiembre de 2026
+
+Se reprodujo el botón Conectar sin respuesta: el campo obligatorio de código estaba dentro de un `details` cerrado y el enlace directo no aportaba la sesión. Las dos regresiones del servidor y las tres iniciales del navegador fallaron antes de implementar la corrección.
+
+La página del mismo origen local ahora recupera la sesión existente, con comprobaciones de Host, Origin, Fetch Metadata, método y encabezado propio. No se eliminó la autenticación de las otras rutas ni se amplió CORS. El formulario deshabilita los campos manuales cerrados y muestra progreso/error dentro del diálogo. Se conserva la conexión manual y la del iniciador; decisión en ADR 0005.
+
+Verificación local: typecheck, Biome (79 archivos), 135 pruebas unitarias en 19 archivos, build, bundle de 114,5 KiB gzip y 26 pruebas E2E en Chromium 153 aprobados. Las cuatro pruebas de conexión también pasaron con Chrome 152. Axe no detectó infracciones medidas WCAG A/AA en el diálogo con error a 390px. Incluye pestaña nueva, recarga, sesión antigua, reintento, modo manual y denegación de otros orígenes.
+
+Se reinició el servicio sin trabajos activos. Las pestañas reales existentes de Codex y Chrome pasaron de desconectadas a PC conectada al recargar y mostraron sus siete referencias visuales. No se copiaron códigos manualmente, no se modificaron campañas ni se generó/publicó contenido para verificar la conexión. El resultado CI del commit final se consulta en GitHub Actions.
+
 ## Diagnóstico de descargas — 10 de septiembre de 2026
 
 El aviso «Este dominio de referencia requiere importación manual» agrupaba causas distintas sin identificar fuente. Se separaron HTTPS, credenciales/puerto, dominio no habilitado y estado HTTP. Preparar un pedido identifica el producto o referencia que falla y no expone consultas privadas ni errores internos del sistema. Las cuatro regresiones fallaron antes de corregirlo y pasaron después; se mantiene la lista de fuentes revisadas y la validación de redirecciones.

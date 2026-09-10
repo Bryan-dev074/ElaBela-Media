@@ -165,6 +165,18 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<LocalApp>
       reply.header('access-control-allow-origin', origin);
       reply.header('vary', 'Origin');
     }
+    if (request.url === '/api/local-connection') {
+      if (
+        request.method !== 'POST' ||
+        origin !== `http://${request.headers.host}` ||
+        request.headers['sec-fetch-site'] !== 'same-origin' ||
+        request.headers['x-elabela-connect'] !== 'local'
+      ) {
+        throw new ServiceError('Abrí la página local para conectar automáticamente.', 403);
+      }
+      store.assertAcceptingWork();
+      return;
+    }
     if (request.method === 'OPTIONS') return;
     if (request.url === '/api/health') return;
     if (request.headers.authorization !== `Bearer ${token}`) {
@@ -203,6 +215,9 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<LocalApp>
   );
 
   app.get('/api/health', async () => ({ ready: true }));
+  app.post('/api/local-connection', async (_request, reply) =>
+    reply.header('cache-control', 'no-store').send({ token }),
+  );
 
   app.options('/api/*', async (request, reply) => {
     if (!request.headers.origin) throw new ServiceError('Origen no autorizado', 403);
